@@ -1,7 +1,12 @@
 const std = @import("std");
 const rl = @import("raylib");
 
+const dinoImport = @import("./dino/dino.zig");
+const utils = @import("./utils/utils.zig");
+
 pub fn main() anyerror!void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
     // Initialization
     //--------------------------------------------------------------------------------------
     const screenWidth = 1920;
@@ -12,12 +17,17 @@ pub fn main() anyerror!void {
     rl.toggleFullscreen();
     defer rl.closeWindow();
 
+    // Alway create textures after window init you stupid fuck !!!!
+    var dino2 = try dinoImport.Dino.init(utils.Pos{ .x = 0, .y = 0 }, allocator);
+    defer dino2.deinit(allocator);
+    ////////////////////////////////////////////////////////////////////////
+
     // Shader setup
     const shader = try rl.loadShader(null, "./resources/shaders/do_nothing.frag.glsl");
     defer rl.unloadShader(shader);
 
     // Texture Setup
-    const dino = try rl.loadTexture("./resources/images/dino.png");
+    const dino = try rl.loadTexture("./resources/images/dinos/dino_idle.png");
     defer rl.unloadTexture(dino);
 
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
@@ -49,9 +59,9 @@ pub fn main() anyerror!void {
             rl.drawLine(0, @divFloor(screenHeight, 2), screenWidth, @divFloor(screenHeight, 2), rl.Color.black);
             rl.drawLine(@divFloor(screenWidth, 2), 0, @divFloor(screenWidth, 2), screenHeight, rl.Color.black);
 
-            const dinoX = @as(i32, @divFloor(screenWidth - dino.width, 2));
-            const dinoY = @as(i32, @divFloor(screenHeight - dino.height, 2));
-            rl.drawTextureEx(dino, rl.Vector2.init(@floatFromInt(dinoX), @floatFromInt(dinoY)), 0.0, 1.25, rl.Color.ray_white);
+            const dinoX = @as(i32, @divExact(screenWidth - dino.width, 2));
+            const dinoY = @as(i32, @divExact(screenHeight, 2) - dino.height);
+            rl.drawTextureEx(dino, rl.Vector2.init(@floatFromInt(dinoX), @floatFromInt(dinoY)), 0.0, 1.0, rl.Color.sky_blue);
         }
         //----------------------------------------------------------------------------------
     }
