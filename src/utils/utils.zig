@@ -39,6 +39,12 @@ pub const Drawable = struct {
         rl.unloadTexture(self.texture);
     }
 
+    pub fn getDimensions(self: Drawable) rl.Vector2 {
+        const width: f32 = @floatFromInt(self.texture.width);
+        const height: f32 = @floatFromInt(self.texture.height);
+        return rl.Vector2.init(width, height);
+    }
+
     pub fn draw(self: *Drawable, pos: Pos) void {
         rl.beginShaderMode(self.shader);
         defer rl.endShaderMode();

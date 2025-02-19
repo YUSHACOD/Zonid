@@ -42,35 +42,35 @@ pub fn main() anyerror!void {
     var dino = try Dino.init(allocator);
     defer dino.deinit(allocator);
     //--------------------------------------------------------------------------------------
-    var bird = try Bird.init(allocator);
-    defer bird.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var moon = try Moon.init(allocator);
-    defer moon.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var star = try Star.init(allocator);
-    defer star.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var cloud = try Cloud.init();
-    defer cloud.deinit();
-    //--------------------------------------------------------------------------------------
-    var gameOver = try GameOver.init();
-    defer gameOver.deinit();
+    // var bird = try Bird.init(allocator);
+    // defer bird.deinit(allocator);
+    // //--------------------------------------------------------------------------------------
+    // var moon = try Moon.init(allocator);
+    // defer moon.deinit(allocator);
+    // //--------------------------------------------------------------------------------------
+    // var star = try Star.init(allocator);
+    // defer star.deinit(allocator);
+    // //--------------------------------------------------------------------------------------
+    // var cloud = try Cloud.init();
+    // defer cloud.deinit();
+    // //--------------------------------------------------------------------------------------
+    // var gameOver = try GameOver.init();
+    // defer gameOver.deinit();
     //--------------------------------------------------------------------------------------
     var ground = try Ground.init();
     defer ground.deinit();
     //--------------------------------------------------------------------------------------
-    var hi = try Hi.init();
-    defer hi.deinit();
-    //--------------------------------------------------------------------------------------
-    var nums = try Nums.init(allocator);
-    defer nums.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var bigTree = try BigTree.init(allocator);
-    defer bigTree.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var smallTree = try SmallTree.init(allocator);
-    defer smallTree.deinit(allocator);
+    // var hi = try Hi.init();
+    // defer hi.deinit();
+    // //--------------------------------------------------------------------------------------
+    // var nums = try Nums.init(allocator);
+    // defer nums.deinit(allocator);
+    // //--------------------------------------------------------------------------------------
+    // var bigTree = try BigTree.init(allocator);
+    // defer bigTree.deinit(allocator);
+    // //--------------------------------------------------------------------------------------
+    // var smallTree = try SmallTree.init(allocator);
+    // defer smallTree.deinit(allocator);
     //--------------------------------------------------------------------------------------
 
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
@@ -93,15 +93,17 @@ pub fn main() anyerror!void {
             rl.KeyboardKey.six => dino.state = DinoStates.Shocked1,
             rl.KeyboardKey.seven => dino.state = DinoStates.Shocked2,
             rl.KeyboardKey.eight => dino.state = DinoStates.Blind,
-            rl.KeyboardKey.nine => bird.state = BirdStates.Down,
-            rl.KeyboardKey.zero => bird.state = BirdStates.Up,
-            rl.KeyboardKey.n => moon.incrementState(),
-            rl.KeyboardKey.j => star.incrementState(),
-            rl.KeyboardKey.y => nums.incrementState(),
-            rl.KeyboardKey.u => bigTree.incrementState(),
-            rl.KeyboardKey.i => smallTree.incrementState(),
+            // rl.KeyboardKey.nine => bird.state = BirdStates.Down,
+            // rl.KeyboardKey.zero => bird.state = BirdStates.Up,
+            // rl.KeyboardKey.n => moon.incrementState(),
+            // rl.KeyboardKey.j => star.incrementState(),
+            // rl.KeyboardKey.y => nums.incrementState(),
+            // rl.KeyboardKey.u => bigTree.incrementState(),
+            // rl.KeyboardKey.i => smallTree.incrementState(),
             else => {},
         }
+
+        ground.groundScrollUpdate();
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -124,18 +126,19 @@ pub fn main() anyerror!void {
             const dinoY = @as(i32, @divFloor(screenHeight, 2) - dino.getHeight());
             dino.draw(utils.Pos.init(dinoX, dinoY));
 
-            bird.draw(utils.Pos.init(5, 5));
-            moon.draw(utils.Pos.init(300, 5));
-            star.draw(utils.Pos.init(400, 5));
-            cloud.draw(utils.Pos.init(700, 5));
+            // bird.draw(utils.Pos.init(5, 5));
+            // moon.draw(utils.Pos.init(300, 5));
+            // star.draw(utils.Pos.init(400, 5));
+            // cloud.draw(utils.Pos.init(700, 5));
 
-            nums.draw(utils.Pos.init(100, 400));
-            bigTree.draw(utils.Pos.init(780, 400));
-            smallTree.draw(utils.Pos.init(567, 600));
+            // nums.draw(utils.Pos.init(100, 400));
+            // bigTree.draw(utils.Pos.init(780, 400));
+            // smallTree.draw(utils.Pos.init(567, 600));
 
-            gameOver.draw(utils.Pos.init(400, 200));
-            ground.draw(utils.Pos.init(0, 600));
-            hi.draw(utils.Pos.init(700, 200));
+            // gameOver.draw(utils.Pos.init(400, 200));
+            // hi.draw(utils.Pos.init(700, 200));
+
+            ground.groundScrollDraw();
         }
         //----------------------------------------------------------------------------------
     }
