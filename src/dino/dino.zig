@@ -41,11 +41,11 @@ pub const DinoStates = enum {
 };
 
 pub const Dino = struct {
-    pos: Pos,
+    pos: Pos = Pos{ .x = 0, .y = 0 },
     state: DinoStates,
     states: []Drawable,
 
-    pub fn init(pos: Pos, allocator: std.mem.Allocator) anyerror!Dino {
+    pub fn init(allocator: std.mem.Allocator) anyerror!Dino {
         const states = try allocator.alloc(Drawable, ResourcePaths.len);
         errdefer allocator.free(states);
 
@@ -54,7 +54,6 @@ pub const Dino = struct {
         }
 
         return Dino{
-            .pos = pos,
             .states = states,
             .state = DinoStates.Idle,
         };

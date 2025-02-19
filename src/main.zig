@@ -1,9 +1,20 @@
 const std = @import("std");
 const rl = @import("raylib");
+const utils = @import("./utils/utils.zig");
 
 const Dino = @import("./dino/dino.zig").Dino;
+const Bird = @import("./bird/bird.zig").Bird;
+const Moon = @import("./moon/moon.zig").Moon;
+const Star = @import("./sky/star.zig").Star;
+const Cloud = @import("./sky/cloud.zig").Cloud;
+const GameOver = @import("./misc/game_over.zig").GameOver;
+const Ground = @import("./misc/ground.zig").Ground;
+const Hi = @import("./misc/hi.zig").Hi;
+
 const DinoStates = @import("./dino/dino.zig").DinoStates;
-const utils = @import("./utils/utils.zig");
+const BirdStates = @import("./bird/bird.zig").BirdStates;
+
+const BackGroundShader = "./resources/shaders/do_nothing.frag.glsl";
 
 pub fn main() anyerror!void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -19,14 +30,36 @@ pub fn main() anyerror!void {
     defer rl.closeWindow();
 
     // Shader setup
-    const shader = try rl.loadShader(null, "./resources/shaders/do_nothing.frag.glsl");
+    const shader = try rl.loadShader(null, BackGroundShader);
     defer rl.unloadShader(shader);
 
     // Texture Setup
     // Alway create textures after window init you stupid fuck !!!!
-    var dino = try Dino.init(utils.Pos{ .x = 0, .y = 0 }, allocator);
+    //--------------------------------------------------------------------------------------
+    var dino = try Dino.init(allocator);
     defer dino.deinit(allocator);
-    ////////////////////////////////////////////////////////////////////////
+    //--------------------------------------------------------------------------------------
+    var bird = try Bird.init(allocator);
+    defer bird.deinit(allocator);
+    //--------------------------------------------------------------------------------------
+    var moon = try Moon.init(allocator);
+    defer moon.deinit(allocator);
+    //--------------------------------------------------------------------------------------
+    var star = try Star.init(allocator);
+    defer star.deinit(allocator);
+    //--------------------------------------------------------------------------------------
+    var cloud = try Cloud.init();
+    defer cloud.deinit();
+    //--------------------------------------------------------------------------------------
+    var gameOver = try GameOver.init();
+    defer gameOver.deinit();
+    //--------------------------------------------------------------------------------------
+    var ground = try Ground.init();
+    defer ground.deinit();
+    //--------------------------------------------------------------------------------------
+    var hi = try Hi.init();
+    defer hi.deinit();
+    //--------------------------------------------------------------------------------------
 
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
     defer rl.unloadRenderTexture(target);
@@ -48,6 +81,10 @@ pub fn main() anyerror!void {
             rl.KeyboardKey.six => dino.state = DinoStates.Shocked1,
             rl.KeyboardKey.seven => dino.state = DinoStates.Shocked2,
             rl.KeyboardKey.eight => dino.state = DinoStates.Blind,
+            rl.KeyboardKey.nine => bird.state = BirdStates.Down,
+            rl.KeyboardKey.zero => bird.state = BirdStates.Up,
+            rl.KeyboardKey.n => moon.incrementState(),
+            rl.KeyboardKey.j => star.incrementState(),
             else => {},
         }
         //----------------------------------------------------------------------------------
@@ -71,6 +108,14 @@ pub fn main() anyerror!void {
             const dinoX = @as(i32, @divFloor(screenWidth - dino.getWidth(), 2));
             const dinoY = @as(i32, @divFloor(screenHeight, 2) - dino.getHeight());
             dino.draw(utils.Pos.init(dinoX, dinoY));
+
+            bird.draw(utils.Pos.init(5, 5));
+            moon.draw(utils.Pos.init(300, 5));
+            star.draw(utils.Pos.init(400, 5));
+            cloud.draw(utils.Pos.init(700, 5));
+            gameOver.draw(utils.Pos.init(400, 200));
+            ground.draw(utils.Pos.init(0, 600));
+            hi.draw(utils.Pos.init(700, 200));
         }
         //----------------------------------------------------------------------------------
     }
