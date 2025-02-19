@@ -1,8 +1,8 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Entity = @import("../utils/utils.zig").Entity;
-const EntityError = @import("../utils/utils.zig").EntityError;
+const Drawable = @import("../utils/utils.zig").Drawable;
+const EntityError = @import("../utils/utils.zig").DrawableError;
 const Pos = @import("../utils/utils.zig").Pos;
 
 const ResourcePaths = [_][*:0]const u8{
@@ -16,28 +16,66 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/dinos/dino_blind.png",
 };
 
+pub const DinoStates = enum {
+    Idle,
+    Run1,
+    Run2,
+    Crawl1,
+    Crawl2,
+    Shocked1,
+    Shocked2,
+    Blind,
+
+    pub fn idx(self: DinoStates) usize {
+        return switch (self) {
+            DinoStates.Idle => 0,
+            DinoStates.Run1 => 1,
+            DinoStates.Run2 => 2,
+            DinoStates.Crawl1 => 3,
+            DinoStates.Crawl2 => 4,
+            DinoStates.Shocked1 => 5,
+            DinoStates.Shocked2 => 6,
+            DinoStates.Blind => 7,
+        };
+    }
+};
+
 pub const Dino = struct {
     pos: Pos,
-    textures: []Entity,
+    state: DinoStates,
+    states: []Drawable,
 
     pub fn init(pos: Pos, allocator: std.mem.Allocator) anyerror!Dino {
-        const textures = try allocator.alloc(Entity, ResourcePaths.len);
-        errdefer allocator.free(textures);
+        const states = try allocator.alloc(Drawable, ResourcePaths.len);
+        errdefer allocator.free(states);
 
         for (ResourcePaths, 0..) |resource, i| {
-            textures[i] = try Entity.init(resource, null);
+            states[i] = try Drawable.init(resource, null);
         }
 
         return Dino{
             .pos = pos,
-            .textures = textures,
+            .states = states,
+            .state = DinoStates.Idle,
         };
     }
 
     pub fn deinit(self: *Dino, allocator: std.mem.Allocator) void {
-        for (self.textures) |entity| {
+        for (self.states) |entity| {
             entity.deinit();
         }
-        allocator.free(self.textures);
+        allocator.free(self.states);
+    }
+
+    pub fn draw(self: *Dino, pos: Pos) void {
+        self.states[self.state.idx()].draw(pos);
+    }
+
+    pub fn getWidth(self: *Dino) i32 {
+        return self.states[self.state.idx()].texture.width;
+    }
+
+    pub fn getHeight(self: *Dino) i32 {
+        return self.states[self.state.idx()].texture.height;
     }
 };
