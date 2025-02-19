@@ -7,6 +7,9 @@ const Bird = @import("./bird/bird.zig").Bird;
 const Moon = @import("./moon/moon.zig").Moon;
 const Star = @import("./sky/star.zig").Star;
 const Cloud = @import("./sky/cloud.zig").Cloud;
+const Nums = @import("./nums/nums.zig").Nums;
+const BigTree = @import("./tree/big_tree.zig").BigTree;
+const SmallTree = @import("./tree/small_tree.zig").SmallTree;
 const GameOver = @import("./misc/game_over.zig").GameOver;
 const Ground = @import("./misc/ground.zig").Ground;
 const Hi = @import("./misc/hi.zig").Hi;
@@ -60,6 +63,15 @@ pub fn main() anyerror!void {
     var hi = try Hi.init();
     defer hi.deinit();
     //--------------------------------------------------------------------------------------
+    var nums = try Nums.init(allocator);
+    defer nums.deinit(allocator);
+    //--------------------------------------------------------------------------------------
+    var bigTree = try BigTree.init(allocator);
+    defer bigTree.deinit(allocator);
+    //--------------------------------------------------------------------------------------
+    var smallTree = try SmallTree.init(allocator);
+    defer smallTree.deinit(allocator);
+    //--------------------------------------------------------------------------------------
 
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
     defer rl.unloadRenderTexture(target);
@@ -85,6 +97,9 @@ pub fn main() anyerror!void {
             rl.KeyboardKey.zero => bird.state = BirdStates.Up,
             rl.KeyboardKey.n => moon.incrementState(),
             rl.KeyboardKey.j => star.incrementState(),
+            rl.KeyboardKey.y => nums.incrementState(),
+            rl.KeyboardKey.u => bigTree.incrementState(),
+            rl.KeyboardKey.i => smallTree.incrementState(),
             else => {},
         }
         //----------------------------------------------------------------------------------
@@ -113,6 +128,11 @@ pub fn main() anyerror!void {
             moon.draw(utils.Pos.init(300, 5));
             star.draw(utils.Pos.init(400, 5));
             cloud.draw(utils.Pos.init(700, 5));
+
+            nums.draw(utils.Pos.init(100, 400));
+            bigTree.draw(utils.Pos.init(780, 400));
+            smallTree.draw(utils.Pos.init(567, 600));
+
             gameOver.draw(utils.Pos.init(400, 200));
             ground.draw(utils.Pos.init(0, 600));
             hi.draw(utils.Pos.init(700, 200));
