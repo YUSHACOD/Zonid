@@ -1,8 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Drawable = @import("../utils/utils.zig").Drawable;
-const EntityError = @import("../utils/utils.zig").DrawableError;
+const Drawable = @import("../utils/drawable.zig").Drawable;
 const Pos = @import("../utils/utils.zig").Pos;
 
 const ResourcePaths = [_][*:0]const u8{
@@ -19,29 +18,31 @@ const ResourcePaths = [_][*:0]const u8{
 };
 
 pub const Nums = struct {
-    pos: Pos = Pos{ .x = 0, .y = 0 },
-    state: usize,
-    states: []Drawable,
+    drawables: []Drawable,
+    state: usize = 0,
+    width: i32,
+    height: i32,
 
     pub fn init(allocator: std.mem.Allocator) anyerror!Nums {
-        const states = try allocator.alloc(Drawable, ResourcePaths.len);
-        errdefer allocator.free(states);
+        const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
+        errdefer allocator.free(drawables);
 
         for (ResourcePaths, 0..) |resource, i| {
-            states[i] = try Drawable.init(resource, null);
+            drawables[i] = try Drawable.init(resource, null);
         }
 
         return Nums{
-            .states = states,
-            .state = 0,
+            .drawables = drawables,
+            .width = drawables[0].texture.width,
+            .height = drawables[0].texture.height,
         };
     }
 
     pub fn deinit(self: *Nums, allocator: std.mem.Allocator) void {
-        for (self.states) |entity| {
+        for (self.drawables) |entity| {
             entity.deinit();
         }
-        allocator.free(self.states);
+        allocator.free(self.drawables);
     }
 
     pub fn incrementState(self: *Nums) void {
@@ -49,14 +50,6 @@ pub const Nums = struct {
     }
 
     pub fn draw(self: *Nums, pos: Pos) void {
-        self.states[self.state].draw(pos);
-    }
-
-    pub fn getWidth(self: *Nums) i32 {
-        return self.states[self.state].texture.width;
-    }
-
-    pub fn getHeight(self: *Nums) i32 {
-        return self.states[self.state].texture.height;
+        self.drawables[self.state].draw(pos);
     }
 };

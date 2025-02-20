@@ -1,8 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Drawable = @import("../utils/utils.zig").Drawable;
-const EntityError = @import("../utils/utils.zig").DrawableError;
+const Drawable = @import("../utils/drawable.zig").Drawable;
 const Pos = @import("../utils/utils.zig").Pos;
 
 const ResourcePaths = [_][*:0]const u8{
@@ -43,38 +42,42 @@ pub const DinoStates = enum {
 pub const Dino = struct {
     pos: Pos = Pos{ .x = 0, .y = 0 },
     state: DinoStates,
-    states: []Drawable,
+    drawables: []Drawable,
+    width: i32,
+    height: i32,
 
     pub fn init(allocator: std.mem.Allocator) anyerror!Dino {
-        const states = try allocator.alloc(Drawable, ResourcePaths.len);
-        errdefer allocator.free(states);
+        const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
+        errdefer allocator.free(drawables);
 
         for (ResourcePaths, 0..) |resource, i| {
-            states[i] = try Drawable.init(resource, null);
+            drawables[i] = try Drawable.init(resource, null);
         }
 
         return Dino{
-            .states = states,
+            .drawables = drawables,
             .state = DinoStates.Idle,
+            .width = drawables[0].texture.width,
+            .height = drawables[0].texture.height,
         };
     }
 
     pub fn deinit(self: *Dino, allocator: std.mem.Allocator) void {
-        for (self.states) |entity| {
+        for (self.drawables) |entity| {
             entity.deinit();
         }
-        allocator.free(self.states);
+        allocator.free(self.drawables);
     }
 
     pub fn draw(self: *Dino, pos: Pos) void {
-        self.states[self.state.idx()].draw(pos);
+        const current_state = self.state.idx();
+
+        self.drawables[current_state].draw(pos);
     }
 
-    pub fn getWidth(self: *Dino) i32 {
-        return self.states[self.state.idx()].texture.width;
-    }
-
-    pub fn getHeight(self: *Dino) i32 {
-        return self.states[self.state.idx()].texture.height;
+    pub fn drawSelf(self: *Dino) void {
+        const current_state = self.state.idx();
+        const mid_adjustedPos: Pos = self.pos.adjustPosMiddle(self.width, self.height);
+        self.drawables[current_state].draw(mid_adjustedPos);
     }
 };

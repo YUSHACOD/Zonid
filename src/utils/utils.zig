@@ -1,6 +1,8 @@
 const std = @import("std");
 const rl = @import("raylib");
 
+const Drawable = @import("drawable.zig").Drawable;
+
 pub const Pos = struct {
     x: i32,
     y: i32,
@@ -12,43 +14,25 @@ pub const Pos = struct {
     pub fn init(x: i32, y: i32) Pos {
         return Pos{ .x = x, .y = y };
     }
-};
 
-pub const Drawable = struct {
-    texture: rl.Texture2D,
-    shader: rl.Shader,
-    rotation: f32,
-    scale: f32,
-    color: rl.Color,
-
-    pub fn init(
-        texture_path: [*:0]const u8,
-        shader_path: ?[*:0]const u8,
-    ) anyerror!Drawable {
-        return Drawable{
-            .texture = try rl.loadTexture(texture_path),
-            .shader = try rl.loadShader(null, shader_path),
-            .rotation = 0.0,
-            .scale = 1.0,
-            .color = rl.Color.white,
+    pub fn vecToPos(vec: rl.Vector2) Pos {
+        return Pos{
+            .x = @intFromFloat(vec.x),
+            .y = @intFromFloat(vec.y),
         };
     }
 
-    pub fn deinit(self: Drawable) void {
-        rl.unloadShader(self.shader);
-        rl.unloadTexture(self.texture);
+    pub fn adjustPosMiddle(pos: *Pos, width: i32, height: i32) Pos {
+        return Pos{ .x = pos.x - @divFloor(width, 2), .y = pos.y - @divFloor(height, 2) };
     }
 
-    pub fn getDimensions(self: Drawable) rl.Vector2 {
-        const width: f32 = @floatFromInt(self.texture.width);
-        const height: f32 = @floatFromInt(self.texture.height);
-        return rl.Vector2.init(width, height);
-    }
+    pub fn updateWithMousePos(pos: *Pos) void {
+        if (rl.isMouseButtonDown(rl.MouseButton.left)) {
+            std.debug.print("mouse pos {}\n", .{rl.getMousePosition()});
+            const mouse_p: Pos = Pos.vecToPos(rl.getMousePosition());
 
-    pub fn draw(self: *Drawable, pos: Pos) void {
-        rl.beginShaderMode(self.shader);
-        defer rl.endShaderMode();
-
-        rl.drawTextureEx(self.texture, pos.toVector(), self.rotation, self.scale, self.color);
+            pos.x = mouse_p.x;
+            pos.y = mouse_p.y;
+        }
     }
 };

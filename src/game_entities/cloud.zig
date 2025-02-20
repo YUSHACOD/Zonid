@@ -1,19 +1,22 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Drawable = @import("../utils/utils.zig").Drawable;
-const EntityError = @import("../utils/utils.zig").DrawableError;
+const Drawable = @import("../utils/drawable.zig").Drawable;
 const Pos = @import("../utils/utils.zig").Pos;
 
 const ResourcePath = "./resources/images/sky/cloud.png";
 
 pub const Cloud = struct {
-    pos: Pos = Pos{ .x = 0, .y = 0 },
     image: Drawable,
+    width: i32,
+    height: i32,
 
     pub fn init() anyerror!Cloud {
+        const image = try Drawable.init(ResourcePath, null);
         return Cloud{
-            .image = try Drawable.init(ResourcePath, null),
+            .image = image,
+            .width = image.texture.width,
+            .height = image.texture.height,
         };
     }
 
@@ -23,13 +26,5 @@ pub const Cloud = struct {
 
     pub fn draw(self: *Cloud, pos: Pos) void {
         self.image.draw(pos);
-    }
-
-    pub fn getWidth(self: *Cloud) i32 {
-        return self.image.texture.width;
-    }
-
-    pub fn getHeight(self: *Cloud) i32 {
-        return self.image.texture.height;
     }
 };
