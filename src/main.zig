@@ -4,23 +4,29 @@ const utils = @import("./utils/utils.zig");
 
 const Dino = @import("./dino/dino.zig").Dino;
 const Bird = @import("./game_entities/bird.zig").Bird;
+const Nums = @import("./game_entities/nums.zig").Nums;
 const Moons = @import("./game_entities/moons.zig").Moons;
 const Stars = @import("./game_entities/stars.zig").Stars;
 const Cloud = @import("./game_entities/cloud.zig").Cloud;
-const Nums = @import("./game_entities/nums.zig").Nums;
+const Ground = @import("./game_entities/ground.zig").Ground;
 const BigTrees = @import("./game_entities/big_trees.zig").BigTrees;
 const SmallTrees = @import("./game_entities/small_trees.zig").SmallTrees;
-const GameOverTitle = @import("./game_entities/game_over.zig").GameOverTitle;
-const Ground = @import("./game_entities/ground.zig").Ground;
 const HiScoreTitle = @import("./game_entities/hi.zig").HiScoreTitle;
+const GameOverTitle = @import("./game_entities/game_over.zig").GameOverTitle;
+
+const Score = @import("./game/score.zig").Score;
 
 const DinoStates = @import("./dino/dino.zig").DinoStates;
 
 const BackGroundShader = "./resources/shaders/do_nothing.frag.glsl";
 
 pub fn main() anyerror!void {
+    // Allocator
+    //--------------------------------------------------------------------------------------
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
+    //--------------------------------------------------------------------------------------
+
     // Initialization
     //--------------------------------------------------------------------------------------
     const screenWidth = 1920;
@@ -72,6 +78,15 @@ pub fn main() anyerror!void {
     defer smallTree.deinit(allocator);
     //--------------------------------------------------------------------------------------
 
+    // Score structure
+    var score: Score = Score{
+        .pos = utils.Pos{ .x = 500, .y = 500 },
+        .value = 123456789,
+        .nums_asset = &nums,
+    };
+
+    //--------------------------------------------------------------------------------------
+
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
     defer rl.unloadRenderTexture(target);
 
@@ -95,7 +110,6 @@ pub fn main() anyerror!void {
             rl.KeyboardKey.o => bird.incrementState(),
             rl.KeyboardKey.n => moon.incrementState(),
             rl.KeyboardKey.j => star.incrementState(),
-            rl.KeyboardKey.y => nums.incrementState(),
             rl.KeyboardKey.u => bigTree.incrementState(),
             rl.KeyboardKey.i => smallTree.incrementState(),
             else => {},
@@ -129,7 +143,6 @@ pub fn main() anyerror!void {
             star.draw(utils.Pos.init(400, 5));
             cloud.draw(utils.Pos.init(700, 5));
 
-            nums.draw(utils.Pos.init(100, 400));
             bigTree.draw(utils.Pos.init(780, 400));
             smallTree.draw(utils.Pos.init(567, 600));
 
@@ -137,6 +150,8 @@ pub fn main() anyerror!void {
             hi.draw(utils.Pos.init(700, 200));
 
             ground.drawGroundScroll();
+
+            try score.drawScore(allocator);
         }
         //----------------------------------------------------------------------------------
     }

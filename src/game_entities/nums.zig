@@ -17,9 +17,10 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/nums/9.png",
 };
 
+const AsciiNumOffset: i32 = 48;
+
 pub const Nums = struct {
     drawables: []Drawable,
-    state: usize = 0,
     width: i32,
     height: i32,
 
@@ -45,11 +46,13 @@ pub const Nums = struct {
         allocator.free(self.drawables);
     }
 
-    pub fn incrementState(self: *Nums) void {
-        self.state = (self.state + 1) % ResourcePaths.len;
-    }
+    pub fn draw(self: *Nums, pos: Pos, char: u8) void {
+        if (std.ascii.isDigit(char)) {
+            const idx: usize = @intCast(char - AsciiNumOffset);
 
-    pub fn draw(self: *Nums, pos: Pos) void {
-        self.drawables[self.state].draw(pos);
+            self.drawables[idx].draw(pos);
+        } else {
+            std.debug.print("risky char bastard: {} \n", .{char});
+        }
     }
 };
