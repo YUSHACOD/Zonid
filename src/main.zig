@@ -2,19 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const utils = @import("./utils/utils.zig");
 
-const Dino = @import("./dino/dino.zig").Dino;
-const Bird = @import("./game_entities/bird.zig").Bird;
-const Nums = @import("./game_entities/nums.zig").Nums;
-const Moons = @import("./game_entities/moons.zig").Moons;
-const Stars = @import("./game_entities/stars.zig").Stars;
-const Cloud = @import("./game_entities/cloud.zig").Cloud;
-const Ground = @import("./game_entities/ground.zig").Ground;
-const BigTrees = @import("./game_entities/big_trees.zig").BigTrees;
-const SmallTrees = @import("./game_entities/small_trees.zig").SmallTrees;
-const HiScoreTitle = @import("./game_entities/hi.zig").HiScoreTitle;
-const GameOverTitle = @import("./game_entities/game_over.zig").GameOverTitle;
-
-const Score = @import("./game/score.zig").Score;
+const DinoGameState = @import("game/game_state.zig").DinoGameState;
 
 const DinoStates = @import("./dino/dino.zig").DinoStates;
 
@@ -44,47 +32,8 @@ pub fn main() anyerror!void {
     // Texture Setup
     // Alway create textures after window init you stupid fuck !!!!
     //--------------------------------------------------------------------------------------
-    var dino = try Dino.init(allocator);
-    defer dino.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var bird = try Bird.init(allocator);
-    defer bird.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var moon = try Moons.init(allocator);
-    defer moon.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var star = try Stars.init(allocator);
-    defer star.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var cloud = try Cloud.init();
-    defer cloud.deinit();
-    //--------------------------------------------------------------------------------------
-    var gameOver = try GameOverTitle.init();
-    defer gameOver.deinit();
-    //--------------------------------------------------------------------------------------
-    var ground = try Ground.init();
-    defer ground.deinit();
-    //--------------------------------------------------------------------------------------
-    var hi = try HiScoreTitle.init();
-    defer hi.deinit();
-    //--------------------------------------------------------------------------------------
-    var nums = try Nums.init(allocator);
-    defer nums.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var bigTree = try BigTrees.init(allocator);
-    defer bigTree.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-    var smallTree = try SmallTrees.init(allocator);
-    defer smallTree.deinit(allocator);
-    //--------------------------------------------------------------------------------------
-
-    // Score structure
-    var score: Score = Score{
-        .pos = utils.Pos{ .x = 500, .y = 500 },
-        .value = 123456789,
-        .nums_asset = &nums,
-    };
-
+    var game_state = try DinoGameState.init(allocator);
+    defer game_state.deinit(allocator);
     //--------------------------------------------------------------------------------------
 
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
@@ -99,25 +48,25 @@ pub fn main() anyerror!void {
         // Update
         //----------------------------------------------------------------------------------
         switch (rl.getKeyPressed()) {
-            rl.KeyboardKey.one => dino.state = DinoStates.Idle,
-            rl.KeyboardKey.two => dino.state = DinoStates.Run1,
-            rl.KeyboardKey.three => dino.state = DinoStates.Run2,
-            rl.KeyboardKey.four => dino.state = DinoStates.Crawl1,
-            rl.KeyboardKey.five => dino.state = DinoStates.Crawl2,
-            rl.KeyboardKey.six => dino.state = DinoStates.Shocked1,
-            rl.KeyboardKey.seven => dino.state = DinoStates.Shocked2,
-            rl.KeyboardKey.eight => dino.state = DinoStates.Blind,
-            rl.KeyboardKey.o => bird.incrementState(),
-            rl.KeyboardKey.n => moon.incrementState(),
-            rl.KeyboardKey.j => star.incrementState(),
-            rl.KeyboardKey.u => bigTree.incrementState(),
-            rl.KeyboardKey.i => smallTree.incrementState(),
+            rl.KeyboardKey.one => game_state.dino.state = DinoStates.Idle,
+            rl.KeyboardKey.two => game_state.dino.state = DinoStates.Run1,
+            rl.KeyboardKey.three => game_state.dino.state = DinoStates.Run2,
+            rl.KeyboardKey.four => game_state.dino.state = DinoStates.Crawl1,
+            rl.KeyboardKey.five => game_state.dino.state = DinoStates.Crawl2,
+            rl.KeyboardKey.six => game_state.dino.state = DinoStates.Shocked1,
+            rl.KeyboardKey.seven => game_state.dino.state = DinoStates.Shocked2,
+            rl.KeyboardKey.eight => game_state.dino.state = DinoStates.Blind,
+            rl.KeyboardKey.o => game_state.bird_asset.incrementState(),
+            rl.KeyboardKey.n => game_state.moon.incrementState(),
+            rl.KeyboardKey.j => game_state.stars_asset.incrementState(),
+            rl.KeyboardKey.u => game_state.big_trees_asset.incrementState(),
+            rl.KeyboardKey.i => game_state.small_trees_asset.incrementState(),
             else => {},
         }
 
-        dino.pos.updateWithMousePos();
+        game_state.dino.pos.updateWithMousePos();
 
-        ground.updateGroundScroll();
+        game_state.ground.updateGroundScroll();
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -136,22 +85,22 @@ pub fn main() anyerror!void {
             rl.drawLine(0, @divFloor(screenHeight, 2), screenWidth, @divFloor(screenHeight, 2), rl.Color.black);
             rl.drawLine(@divFloor(screenWidth, 2), 0, @divFloor(screenWidth, 2), screenHeight, rl.Color.black);
 
-            dino.drawSelf();
+            game_state.dino.drawSelf();
 
-            bird.draw(utils.Pos.init(5, 5));
-            moon.draw(utils.Pos.init(300, 5));
-            star.draw(utils.Pos.init(400, 5));
-            cloud.draw(utils.Pos.init(700, 5));
+            game_state.bird_asset.draw(utils.Pos.init(5, 5));
+            game_state.moon.draw(utils.Pos.init(300, 5));
+            game_state.stars_asset.draw(utils.Pos.init(400, 5));
+            game_state.cloud_asset.draw(utils.Pos.init(700, 5));
 
-            bigTree.draw(utils.Pos.init(780, 400));
-            smallTree.draw(utils.Pos.init(567, 600));
+            game_state.big_trees_asset.draw(utils.Pos.init(780, 400));
+            game_state.small_trees_asset.draw(utils.Pos.init(567, 600));
 
-            gameOver.draw(utils.Pos.init(400, 200));
-            hi.draw(utils.Pos.init(700, 200));
+            game_state.game_over_title.draw(utils.Pos.init(400, 200));
+            game_state.hi_title.draw(utils.Pos.init(700, 200));
 
-            ground.drawGroundScroll();
+            game_state.ground.drawGroundScroll();
 
-            try score.drawScore(allocator);
+            // try game_state.score.drawScore(allocator);
         }
         //----------------------------------------------------------------------------------
     }

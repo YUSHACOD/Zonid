@@ -10,12 +10,31 @@ const ResourcePaths = [_][*:0]const u8{
 };
 
 pub const Bird = struct {
+    assets: *BirdAsset,
+    state: usize = 0,
+
+    pub fn init(bird_asset: *BirdAsset) Bird {
+        return Bird{
+            .assets = bird_asset,
+        };
+    }
+
+    pub fn incrementState(self: *Bird) void {
+        self.assets.drawables[self.state] = (self.state + 1) % ResourcePaths.len;
+    }
+
+    pub fn draw(self: *Bird, pos: Pos) void {
+        self.assets.drawables[self.state].draw(pos);
+    }
+};
+
+pub const BirdAsset = struct {
     drawables: []Drawable,
     state: usize = 0,
     width: i32,
     height: i32,
 
-    pub fn init(allocator: std.mem.Allocator) anyerror!Bird {
+    pub fn init(allocator: std.mem.Allocator) anyerror!BirdAsset {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
         errdefer allocator.free(drawables);
 
@@ -23,25 +42,25 @@ pub const Bird = struct {
             drawables[i] = try Drawable.init(resource, null);
         }
 
-        return Bird{
+        return BirdAsset{
             .drawables = drawables,
             .width = drawables[0].texture.width,
             .height = drawables[0].texture.height,
         };
     }
 
-    pub fn deinit(self: *Bird, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *BirdAsset, allocator: std.mem.Allocator) void {
         for (self.drawables) |entity| {
             entity.deinit();
         }
         allocator.free(self.drawables);
     }
 
-    pub fn incrementState(self: *Bird) void {
+    pub fn incrementState(self: *BirdAsset) void {
         self.state = (self.state + 1) % ResourcePaths.len;
     }
 
-    pub fn draw(self: *Bird, pos: Pos) void {
+    pub fn draw(self: *BirdAsset, pos: Pos) void {
         self.drawables[self.state].draw(pos);
     }
 };

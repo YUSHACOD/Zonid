@@ -14,14 +14,14 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/moons/moon_7.png",
 };
 
-pub const Moons = struct {
+pub const Moon = struct {
     pos: Pos = Pos.init(0, 0),
     drawables: []Drawable,
     state: usize = 0,
     width: i32,
     height: i32,
 
-    pub fn init(allocator: std.mem.Allocator) anyerror!Moons {
+    pub fn init(allocator: std.mem.Allocator) anyerror!Moon {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
         errdefer allocator.free(drawables);
 
@@ -29,29 +29,29 @@ pub const Moons = struct {
             drawables[i] = try Drawable.init(resource, null);
         }
 
-        return Moons{
+        return Moon{
             .drawables = drawables,
             .width = drawables[0].texture.width,
             .height = drawables[0].texture.height,
         };
     }
 
-    pub fn deinit(self: *Moons, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *Moon, allocator: std.mem.Allocator) void {
         for (self.drawables) |entity| {
             entity.deinit();
         }
         allocator.free(self.drawables);
     }
 
-    pub fn incrementState(self: *Moons) void {
+    pub fn incrementState(self: *Moon) void {
         self.state = (self.state + 1) % ResourcePaths.len;
     }
 
-    pub fn draw(self: *Moons, pos: Pos) void {
+    pub fn draw(self: *Moon, pos: Pos) void {
         self.drawables[self.state].draw(pos);
     }
 
-    pub fn drawSelf(self: *Moons) void {
+    pub fn drawSelf(self: *Moon) void {
         self.drawables[self.state].draw(self.pos);
     }
 };

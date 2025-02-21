@@ -7,7 +7,7 @@ const Pos = @import("../utils/utils.zig").Pos;
 const Spacing: i32 = 25;
 
 pub const Score = struct {
-    value: u32,
+    value: u32 = 0,
     pos: Pos = Pos.init(0, 0),
     nums_asset: *Nums,
 
