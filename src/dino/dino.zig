@@ -17,31 +17,28 @@ const ResourcePaths = [_][*:0]const u8{
 
 pub const DinoStates = enum {
     Idle,
-    Run1,
-    Run2,
-    Crawl1,
-    Crawl2,
-    Shocked1,
-    Shocked2,
+    Running,
+    Crawling,
+    Shocked,
     Blind,
 
-    pub fn idx(self: DinoStates) usize {
-        return switch (self) {
+    pub fn updateIndex(self: DinoStates) usize {
+        const result: usize = switch (self) {
             DinoStates.Idle => 0,
-            DinoStates.Run1 => 1,
-            DinoStates.Run2 => 2,
-            DinoStates.Crawl1 => 3,
-            DinoStates.Crawl2 => 4,
-            DinoStates.Shocked1 => 5,
-            DinoStates.Shocked2 => 6,
+            DinoStates.Running => 1,
+            DinoStates.Crawling => 3,
+            DinoStates.Shocked => 5,
             DinoStates.Blind => 7,
         };
+
+        return result;
     }
 };
 
 pub const Dino = struct {
     pos: Pos = Pos{ .x = 0, .y = 0 },
     state: DinoStates,
+    state_idx: usize = 0,
     drawables: []Drawable,
     width: i32,
     height: i32,
@@ -69,14 +66,29 @@ pub const Dino = struct {
         allocator.free(self.drawables);
     }
 
+    pub fn changeState(self: *Dino, state: DinoStates) void {
+        self.state = state;
+        self.state_idx = state.updateIndex();
+    }
+
+    pub fn incrementState(self: *Dino) void {
+        switch (self.state) {
+            DinoStates.Idle => self.state_idx = 0,
+            DinoStates.Running => self.state_idx = if (self.state_idx == 1) 2 else 1,
+            DinoStates.Crawling => self.state_idx = if (self.state_idx == 3) 4 else 3,
+            DinoStates.Shocked => self.state_idx = if (self.state_idx == 5) 6 else 5,
+            DinoStates.Blind => self.state_idx = 7,
+        }
+    }
+
     pub fn draw(self: *Dino, pos: Pos) void {
-        const current_state = self.state.idx();
+        const current_state = self.state_idx;
 
         self.drawables[current_state].draw(pos);
     }
 
     pub fn drawSelf(self: *Dino) void {
-        const current_state = self.state.idx();
+        const current_state = self.state_idx;
         const mid_adjustedPos: Pos = self.pos.adjustPosMiddle(self.width, self.height);
         self.drawables[current_state].draw(mid_adjustedPos);
     }

@@ -48,14 +48,11 @@ pub fn main() anyerror!void {
         // Update
         //----------------------------------------------------------------------------------
         switch (rl.getKeyPressed()) {
-            rl.KeyboardKey.one => game_state.dino.state = DinoStates.Idle,
-            rl.KeyboardKey.two => game_state.dino.state = DinoStates.Run1,
-            rl.KeyboardKey.three => game_state.dino.state = DinoStates.Run2,
-            rl.KeyboardKey.four => game_state.dino.state = DinoStates.Crawl1,
-            rl.KeyboardKey.five => game_state.dino.state = DinoStates.Crawl2,
-            rl.KeyboardKey.six => game_state.dino.state = DinoStates.Shocked1,
-            rl.KeyboardKey.seven => game_state.dino.state = DinoStates.Shocked2,
-            rl.KeyboardKey.eight => game_state.dino.state = DinoStates.Blind,
+            rl.KeyboardKey.one => game_state.dino.changeState(DinoStates.Idle),
+            rl.KeyboardKey.two => game_state.dino.changeState(DinoStates.Running),
+            rl.KeyboardKey.three => game_state.dino.changeState(DinoStates.Crawling),
+            rl.KeyboardKey.four => game_state.dino.changeState(DinoStates.Shocked),
+            rl.KeyboardKey.five => game_state.dino.changeState(DinoStates.Blind),
             rl.KeyboardKey.o => game_state.bird_asset.incrementState(),
             rl.KeyboardKey.n => game_state.moon.incrementState(),
             rl.KeyboardKey.j => game_state.stars_asset.incrementState(),
