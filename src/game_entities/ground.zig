@@ -2,24 +2,24 @@ const std = @import("std");
 const rl = @import("raylib");
 
 const Drawable = @import("../utils/drawable.zig").Drawable;
-const Pos = @import("../utils/utils.zig").Pos;
+const utils = @import("../utils/utils.zig");
 
 const ResourcePath = "./resources/images/misc/ground.png";
 
 pub const Ground = struct {
-    pos: Pos = Pos.init(0, 0),
+    pos: rl.Vector2 = rl.Vector2.init(0, 0),
     scroll_speed: f32 = 3.0,
     width_start: f32 = 0.0,
     image: Drawable,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
 
     pub fn init() anyerror!Ground {
         const image = try Drawable.init(ResourcePath, null);
         return Ground{
             .image = image,
-            .width = image.texture.width,
-            .height = image.texture.height,
+            .width = @floatFromInt(image.texture.width),
+            .height = @floatFromInt(image.texture.height),
         };
     }
 
@@ -27,7 +27,7 @@ pub const Ground = struct {
         self.image.deinit();
     }
 
-    pub fn draw(self: *Ground, pos: Pos) void {
+    pub fn draw(self: *Ground, pos: rl.Vector2) void {
         self.image.draw(pos);
     }
 

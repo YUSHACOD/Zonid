@@ -1,9 +1,9 @@
 const std = @import("std");
 const rl = @import("raylib");
+
 const utils = @import("./utils/utils.zig");
 
 const DinoGameState = @import("game/game_state.zig").DinoGameState;
-
 const DinoStates = @import("./dino/dino.zig").DinoStates;
 
 const BackGroundShader = "./resources/shaders/do_nothing.frag.glsl";
@@ -64,6 +64,7 @@ pub fn main() anyerror!void {
         }
 
         game_state.dino.updateAnimation(game_state.dino_animation_speed);
+        game_state.dino.updateJumpAnimation();
 
         game_state.ground.updateGroundScroll();
         //----------------------------------------------------------------------------------
@@ -86,15 +87,15 @@ pub fn main() anyerror!void {
 
             game_state.dino.drawSelf();
 
-            game_state.bird_asset.draw(utils.Pos.init(5, 5));
-            game_state.moon.draw(utils.Pos.init(300, 5));
-            game_state.stars_asset.draw(utils.Pos.init(400, 5));
-            game_state.cloud_asset.draw(utils.Pos.init(700, 5));
+            game_state.bird_asset.draw(rl.Vector2.init(5, 5));
+            game_state.moon.draw(rl.Vector2.init(300, 5));
+            game_state.stars_asset.draw(rl.Vector2.init(400, 5));
+            game_state.cloud_asset.draw(rl.Vector2.init(700, 5));
 
-            game_state.big_trees_asset.draw(utils.Pos.init(780, 400));
-            game_state.small_trees_asset.draw(utils.Pos.init(567, 600));
+            game_state.big_trees_asset.draw(rl.Vector2.init(780, 625));
+            game_state.small_trees_asset.draw(rl.Vector2.init(567, 600));
 
-            game_state.game_over_title.draw(utils.Pos.init(400, 200));
+            game_state.game_over_title.draw(rl.Vector2.init(400, 200));
 
             game_state.hi_title.drawSelf();
             try game_state.current_score.drawScore(allocator, &game_state.nums_asset);

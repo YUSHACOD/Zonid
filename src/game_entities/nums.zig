@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 
 const Drawable = @import("../utils/drawable.zig").Drawable;
-const Pos = @import("../utils/utils.zig").Pos;
+const utils = @import("../utils/utils.zig");
 
 const ResourcePaths = [_][*:0]const u8{
     "./resources/images/nums/0.png",
@@ -17,12 +17,12 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/nums/9.png",
 };
 
-const AsciiNumOffset: i32 = 48;
+const AsciiNumOffset: u8 = 48;
 
 pub const Nums = struct {
     drawables: []Drawable,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
 
     pub fn init(allocator: std.mem.Allocator) anyerror!Nums {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
@@ -34,8 +34,8 @@ pub const Nums = struct {
 
         return Nums{
             .drawables = drawables,
-            .width = drawables[0].texture.width,
-            .height = drawables[0].texture.height,
+            .width = @floatFromInt(drawables[0].texture.width),
+            .height = @floatFromInt(drawables[0].texture.height),
         };
     }
 
@@ -46,7 +46,7 @@ pub const Nums = struct {
         allocator.free(self.drawables);
     }
 
-    pub fn draw(self: *const Nums, pos: Pos, char: u8) void {
+    pub fn draw(self: *const Nums, pos: rl.Vector2, char: u8) void {
         if (std.ascii.isDigit(char)) {
             const idx: usize = @intCast(char - AsciiNumOffset);
 

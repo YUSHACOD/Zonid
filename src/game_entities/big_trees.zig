@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 
 const Drawable = @import("../utils/drawable.zig").Drawable;
-const Pos = @import("../utils/utils.zig").Pos;
+const utils = @import("../utils/utils.zig");
 
 const ResourcePaths = [_][*:0]const u8{
     "./resources/images/big_tree/big_tree_1.png",
@@ -15,8 +15,8 @@ const ResourcePaths = [_][*:0]const u8{
 pub const BigTrees = struct {
     drawables: []Drawable,
     state: usize = 0,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
 
     pub fn init(allocator: std.mem.Allocator) anyerror!BigTrees {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
@@ -28,8 +28,8 @@ pub const BigTrees = struct {
 
         return BigTrees{
             .drawables = drawables,
-            .width = drawables[0].texture.width,
-            .height = drawables[0].texture.height,
+            .width = @floatFromInt(drawables[0].texture.width),
+            .height = @floatFromInt(drawables[0].texture.height),
         };
     }
 
@@ -44,7 +44,8 @@ pub const BigTrees = struct {
         self.state = (self.state + 1) % ResourcePaths.len;
     }
 
-    pub fn draw(self: *BigTrees, pos: Pos) void {
-        self.drawables[self.state].draw(pos);
+    pub fn draw(self: *BigTrees, pos: rl.Vector2) void {
+        const adjusted_pos: rl.Vector2 = utils.adjustPosWidth(pos, self.width, self.height);
+        self.drawables[self.state].draw(adjusted_pos);
     }
 };

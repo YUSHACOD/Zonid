@@ -1,7 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Pos = @import("utils.zig").Pos;
+const utils = @import("utils.zig");
 
 pub const Drawable = struct {
     texture: rl.Texture2D,
@@ -34,10 +34,10 @@ pub const Drawable = struct {
         return rl.Vector2.init(width, height);
     }
 
-    pub fn draw(self: *Drawable, pos: Pos) void {
+    pub fn draw(self: *Drawable, pos: rl.Vector2) void {
         rl.beginShaderMode(self.shader);
         defer rl.endShaderMode();
 
-        rl.drawTextureEx(self.texture, pos.toVector(), self.rotation, self.scale, self.color);
+        rl.drawTextureEx(self.texture, pos, self.rotation, self.scale, self.color);
     }
 };

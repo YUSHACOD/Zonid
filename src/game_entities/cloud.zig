@@ -2,21 +2,21 @@ const std = @import("std");
 const rl = @import("raylib");
 
 const Drawable = @import("../utils/drawable.zig").Drawable;
-const Pos = @import("../utils/utils.zig").Pos;
+const utils = @import("../utils/utils.zig");
 
 const ResourcePath = "./resources/images/sky/cloud.png";
 
 pub const Cloud = struct {
     image: Drawable,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
 
     pub fn init() anyerror!Cloud {
         const image = try Drawable.init(ResourcePath, null);
         return Cloud{
             .image = image,
-            .width = image.texture.width,
-            .height = image.texture.height,
+            .width = @floatFromInt(image.texture.width),
+            .height = @floatFromInt(image.texture.height),
         };
     }
 
@@ -24,7 +24,7 @@ pub const Cloud = struct {
         self.image.deinit();
     }
 
-    pub fn draw(self: *Cloud, pos: Pos) void {
+    pub fn draw(self: *Cloud, pos: rl.Vector2) void {
         self.image.draw(pos);
     }
 };

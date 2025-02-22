@@ -1,7 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Pos = @import("../utils/utils.zig").Pos;
+const utils = @import("../utils/utils.zig");
 
 const BirdAsset = @import("../game_entities/bird.zig").BirdAsset;
 const Nums = @import("../game_entities/nums.zig").Nums;
@@ -18,9 +18,9 @@ const Dino = @import("../dino/dino.zig").Dino;
 const Score = @import("./score.zig").Score;
 const Bird = @import("../game_entities/bird.zig").Bird;
 
-const HiScorePos = Pos.init(1350, 37);
-const CurrScorePos = Pos.init(1640, 37);
-const HiScoreTitlePos = Pos.init(1300, 37);
+const HiScorePos = rl.Vector2.init(1350, 37);
+const CurrScorePos = rl.Vector2.init(1640, 37);
+const HiScoreTitlePos = rl.Vector2.init(1300, 37);
 
 pub const DinoGameState = struct {
     // Actors

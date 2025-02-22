@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 
 const Drawable = @import("../utils/drawable.zig").Drawable;
-const Pos = @import("../utils/utils.zig").Pos;
+const utils = @import("../utils/utils.zig");
 
 const ResourcePaths = [_][*:0]const u8{
     "./resources/images/dinos/dino_idle.png",
@@ -15,7 +15,11 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/dinos/dino_blind.png",
 };
 
-const DinoPos: Pos = Pos.init(380, 620);
+const DinoPos: rl.Vector2 = utils.init(380, 620);
+const JumpHeight: f32 = 485;
+const JumpHeightEx: f32 = 470;
+const JumpSpeed: f32 = 2;
+const JumpHeightIncrement: f32 = @divFloor((DinoPos.y - JumpHeight), JumpSpeed);
 
 pub const DinoStates = enum {
     Idle,
@@ -38,13 +42,15 @@ pub const DinoStates = enum {
 };
 
 pub const Dino = struct {
-    pos: Pos = DinoPos,
+    pos: rl.Vector2 = DinoPos,
     state: DinoStates,
     state_idx: usize = 0,
     drawables: []Drawable,
     state_change_time: f32 = 0.0,
-    width: i32,
-    height: i32,
+    is_jumping: bool = false,
+    jump_state: bool = true,
+    width: f32,
+    height: f32,
 
     pub fn init(allocator: std.mem.Allocator) anyerror!Dino {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
@@ -57,8 +63,8 @@ pub const Dino = struct {
         return Dino{
             .drawables = drawables,
             .state = DinoStates.Idle,
-            .width = drawables[0].texture.width,
-            .height = drawables[0].texture.height,
+            .width = @floatFromInt(drawables[0].texture.width),
+            .height = @floatFromInt(drawables[0].texture.height),
         };
     }
 
@@ -93,7 +99,27 @@ pub const Dino = struct {
         }
     }
 
-    pub fn draw(self: *Dino, pos: Pos) void {
+    pub fn updateJumpAnimation(self: *Dino) void {
+        if (rl.isKeyPressed(rl.KeyboardKey.space) and !self.is_jumping) {
+            self.is_jumping = true;
+        }
+
+        if (self.is_jumping) {
+            if (self.jump_state) {
+                self.pos.y -= JumpHeightIncrement;
+                self.jump_state = if (self.pos.y >= JumpHeight) false else true;
+            } else {
+                self.pos.y += JumpHeightIncrement;
+                if (self.pos.y <= DinoPos.y) {
+                    self.pos.y = DinoPos.y;
+                    self.jump_state = true;
+                    self.is_jumping = false;
+                }
+            }
+        }
+    }
+
+    pub fn draw(self: *Dino, pos: rl.Vector2) void {
         const current_state = self.state_idx;
 
         self.drawables[current_state].draw(pos);
@@ -101,7 +127,7 @@ pub const Dino = struct {
 
     pub fn drawSelf(self: *Dino) void {
         const current_state = self.state_idx;
-        const mid_adjustedPos: Pos = self.pos.adjustPosWidth(self.width, self.height);
+        const mid_adjustedPos: rl.Vector2 = utils.adjustPosWidth(self.pos, self.width, self.height);
         self.drawables[current_state].draw(mid_adjustedPos);
     }
 };
