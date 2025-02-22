@@ -16,10 +16,10 @@ const ResourcePaths = [_][*:0]const u8{
 };
 
 const DinoPos: rl.Vector2 = utils.init(380, 620);
-const JumpHeight: f32 = 485;
-const JumpHeightEx: f32 = 470;
-const JumpSpeed: f32 = 2;
-const JumpHeightIncrement: f32 = @divFloor((DinoPos.y - JumpHeight), JumpSpeed);
+const DinoAnimationSpeed: f32 = 0.1;
+
+const Gravity: rl.Vector2 = rl.Vector2.init(0, 2000);
+const JumpVelocity: rl.Vector2 = rl.Vector2.init(0, -900);
 
 pub const DinoStates = enum {
     Idle,
@@ -47,8 +47,8 @@ pub const Dino = struct {
     state_idx: usize = 0,
     drawables: []Drawable,
     state_change_time: f32 = 0.0,
+    velocity: rl.Vector2 = rl.Vector2.init(0, 0),
     is_jumping: bool = false,
-    jump_state: bool = true,
     width: f32,
     height: f32,
 
@@ -90,33 +90,43 @@ pub const Dino = struct {
         }
     }
 
-    pub fn updateAnimation(self: *Dino, animation_speed: f32) void {
-        self.state_change_time += rl.getFrameTime();
+    pub fn updateAnimation(self: *Dino) void {
+        const time_elapsed: f32 = rl.getFrameTime();
 
-        if (self.state_change_time >= animation_speed) {
+        // State Change
+        // -------------------------------------------
+        self.state_change_time += rl.getFrameTime();
+        if (self.state_change_time >= DinoAnimationSpeed) {
             self.incrementState();
             self.state_change_time = 0.0;
         }
-    }
+        // -------------------------------------------
 
-    pub fn updateJumpAnimation(self: *Dino) void {
+        // Position Update
+        // -------------------------------------------
+        // Gravity
+        const displacement: rl.Vector2 = utils.displacement(self.velocity, Gravity, time_elapsed);
+        // New Velocity
+        self.velocity = utils.newVelocity(self.velocity, Gravity, time_elapsed);
+        self.pos = self.pos.add(displacement);
+        // -------------------------------------------
+
+        // Ground Collision
+        // -------------------------------------------
+        if (self.pos.y >= DinoPos.y) {
+            self.pos.y = DinoPos.y;
+            self.velocity = rl.Vector2.init(0, 0);
+            self.is_jumping = false;
+        }
+        // -------------------------------------------
+
+        // Jump
+        // -------------------------------------------
         if (rl.isKeyPressed(rl.KeyboardKey.space) and !self.is_jumping) {
             self.is_jumping = true;
+            self.velocity = JumpVelocity;
         }
-
-        if (self.is_jumping) {
-            if (self.jump_state) {
-                self.pos.y -= JumpHeightIncrement;
-                self.jump_state = if (self.pos.y >= JumpHeight) false else true;
-            } else {
-                self.pos.y += JumpHeightIncrement;
-                if (self.pos.y <= DinoPos.y) {
-                    self.pos.y = DinoPos.y;
-                    self.jump_state = true;
-                    self.is_jumping = false;
-                }
-            }
-        }
+        // -------------------------------------------
     }
 
     pub fn draw(self: *Dino, pos: rl.Vector2) void {
@@ -128,6 +138,7 @@ pub const Dino = struct {
     pub fn drawSelf(self: *Dino) void {
         const current_state = self.state_idx;
         const mid_adjustedPos: rl.Vector2 = utils.adjustPosWidth(self.pos, self.width, self.height);
+
         self.drawables[current_state].draw(mid_adjustedPos);
     }
 };

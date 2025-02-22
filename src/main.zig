@@ -63,8 +63,8 @@ pub fn main() anyerror!void {
             else => {},
         }
 
-        game_state.dino.updateAnimation(game_state.dino_animation_speed);
-        game_state.dino.updateJumpAnimation();
+        game_state.dino.updateAnimation();
+        utils.updateWithMousePos(&game_state.dino.pos);
 
         game_state.ground.updateGroundScroll();
         //----------------------------------------------------------------------------------

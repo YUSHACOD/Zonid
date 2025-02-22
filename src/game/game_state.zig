@@ -50,7 +50,7 @@ pub const DinoGameState = struct {
 
     // Speeds
     // ----------------------------
-    dino_animation_speed: f32 = 0.0,
+    dino_animation_speed: f32 = 0.1,
     // ----------------------------
 
     // Text Assets
