@@ -7,14 +7,15 @@ const Pos = @import("../utils/utils.zig").Pos;
 const ResourcePath = "./resources/images/misc/hi.png";
 
 pub const HiScoreTitle = struct {
-    pos: Pos = Pos.init(0, 0),
+    pos: Pos,
     image: Drawable,
     width: i32,
     height: i32,
 
-    pub fn init() anyerror!HiScoreTitle {
+    pub fn init(pos: Pos) anyerror!HiScoreTitle {
         const image = try Drawable.init(ResourcePath, null);
         return HiScoreTitle{
+            .pos = pos,
             .image = image,
             .width = image.texture.width,
             .height = image.texture.height,
@@ -30,6 +31,7 @@ pub const HiScoreTitle = struct {
     }
 
     pub fn drawSelf(self: *HiScoreTitle) void {
-        self.drawables[self.state].draw(self.pos);
+        const mid_adjustedPos: Pos = self.pos.adjustPosMiddle(self.width, self.height);
+        self.image.draw(mid_adjustedPos);
     }
 };

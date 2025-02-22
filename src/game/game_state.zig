@@ -18,8 +18,9 @@ const Dino = @import("../dino/dino.zig").Dino;
 const Score = @import("./score.zig").Score;
 const Bird = @import("../game_entities/bird.zig").Bird;
 
-const HiScorePos = Pos.init(0, 0);
-const CurrScorePos = Pos.init(0, 0);
+const HiScorePos = Pos.init(1350, 37);
+const CurrScorePos = Pos.init(1640, 37);
+const HiScoreTitlePos = Pos.init(1300, 37);
 
 pub const DinoGameState = struct {
     // Actors
@@ -47,32 +48,24 @@ pub const DinoGameState = struct {
     hi_title: HiScoreTitle,
     // ----------------------------
 
+    // Speeds
+    // ----------------------------
+    dino_animation_speed: f32 = 0.0,
+    // ----------------------------
+
+    // Text Assets
+    // ------------------------------------------------------------
     pub fn init(allocator: std.mem.Allocator) anyerror!DinoGameState {
-        var nums_asset = try Nums.init(allocator);
+        const nums_asset = try Nums.init(allocator);
         const big_trees_asset = try BigTrees.init(allocator);
         const small_trees_asset = try SmallTrees.init(allocator);
         const bird_asset = try BirdAsset.init(allocator);
         const cloud_asset = try Cloud.init();
         const stars_asset = try Stars.init(allocator);
         const game_over_title = try GameOverTitle.init();
-        const hi_title = try HiScoreTitle.init();
+        const hi_title = try HiScoreTitle.init(HiScoreTitlePos);
 
         return DinoGameState{
-            // Game Actors
-            // ----------------------------
-            .dino = try Dino.init(allocator),
-            .hi_score = Score{
-                .pos = HiScorePos,
-                .nums_asset = &nums_asset,
-            },
-            .current_score = Score{
-                .pos = CurrScorePos,
-                .nums_asset = &nums_asset,
-            },
-            .ground = try Ground.init(),
-            .moon = try Moon.init(allocator),
-            // ----------------------------
-
             // Asset Initialization
             // ----------------------------
             .nums_asset = nums_asset,
@@ -85,6 +78,20 @@ pub const DinoGameState = struct {
             .hi_title = hi_title,
             // ----------------------------
 
+            // Game Actors
+            // ----------------------------
+            .dino = try Dino.init(allocator),
+            .hi_score = Score{
+                .value = 123456789,
+                .pos = HiScorePos,
+            },
+            .current_score = Score{
+                .value = 123456789,
+                .pos = CurrScorePos,
+            },
+            .ground = try Ground.init(),
+            .moon = try Moon.init(allocator),
+            // ----------------------------
         };
     }
 
@@ -100,4 +107,5 @@ pub const DinoGameState = struct {
         self.cloud_asset.deinit();
         self.stars_asset.deinit(allocator);
     }
+    // ------------------------------------------------------------
 };

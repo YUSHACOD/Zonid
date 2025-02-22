@@ -15,6 +15,8 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/dinos/dino_blind.png",
 };
 
+const DinoPos: Pos = Pos.init(380, 620);
+
 pub const DinoStates = enum {
     Idle,
     Running,
@@ -36,10 +38,11 @@ pub const DinoStates = enum {
 };
 
 pub const Dino = struct {
-    pos: Pos = Pos{ .x = 0, .y = 0 },
+    pos: Pos = DinoPos,
     state: DinoStates,
     state_idx: usize = 0,
     drawables: []Drawable,
+    state_change_time: f32 = 0.0,
     width: i32,
     height: i32,
 
@@ -81,6 +84,15 @@ pub const Dino = struct {
         }
     }
 
+    pub fn updateAnimation(self: *Dino, animation_speed: f32) void {
+        self.state_change_time += rl.getFrameTime();
+
+        if (self.state_change_time >= animation_speed) {
+            self.incrementState();
+            self.state_change_time = 0.0;
+        }
+    }
+
     pub fn draw(self: *Dino, pos: Pos) void {
         const current_state = self.state_idx;
 
@@ -89,7 +101,7 @@ pub const Dino = struct {
 
     pub fn drawSelf(self: *Dino) void {
         const current_state = self.state_idx;
-        const mid_adjustedPos: Pos = self.pos.adjustPosMiddle(self.width, self.height);
+        const mid_adjustedPos: Pos = self.pos.adjustPosWidth(self.width, self.height);
         self.drawables[current_state].draw(mid_adjustedPos);
     }
 };

@@ -53,6 +53,8 @@ pub fn main() anyerror!void {
             rl.KeyboardKey.three => game_state.dino.changeState(DinoStates.Crawling),
             rl.KeyboardKey.four => game_state.dino.changeState(DinoStates.Shocked),
             rl.KeyboardKey.five => game_state.dino.changeState(DinoStates.Blind),
+            rl.KeyboardKey.nine => game_state.dino_animation_speed += 0.1,
+            rl.KeyboardKey.zero => game_state.dino_animation_speed -= 0.1,
             rl.KeyboardKey.o => game_state.bird_asset.incrementState(),
             rl.KeyboardKey.n => game_state.moon.incrementState(),
             rl.KeyboardKey.j => game_state.stars_asset.incrementState(),
@@ -61,7 +63,7 @@ pub fn main() anyerror!void {
             else => {},
         }
 
-        game_state.dino.pos.updateWithMousePos();
+        game_state.dino.updateAnimation(game_state.dino_animation_speed);
 
         game_state.ground.updateGroundScroll();
         //----------------------------------------------------------------------------------
@@ -93,7 +95,10 @@ pub fn main() anyerror!void {
             game_state.small_trees_asset.draw(utils.Pos.init(567, 600));
 
             game_state.game_over_title.draw(utils.Pos.init(400, 200));
-            game_state.hi_title.draw(utils.Pos.init(700, 200));
+
+            game_state.hi_title.drawSelf();
+            try game_state.current_score.drawScore(allocator, &game_state.nums_asset);
+            try game_state.hi_score.drawScore(allocator, &game_state.nums_asset);
 
             game_state.ground.drawGroundScroll();
 

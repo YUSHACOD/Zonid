@@ -26,6 +26,14 @@ pub const Pos = struct {
         return Pos{ .x = pos.x - @divFloor(width, 2), .y = pos.y - @divFloor(height, 2) };
     }
 
+    pub fn adjustPosWidth(pos: *Pos, width: i32, height: i32) Pos {
+        return Pos{ .x = pos.x - @divFloor(width, 2), .y = pos.y - height };
+    }
+
+    pub fn adjustPosHeight(pos: *Pos, height: i32) Pos {
+        return Pos{ .x = pos.x, .y = pos.y - @divFloor(height, 2) };
+    }
+
     pub fn updateWithMousePos(pos: *Pos) void {
         if (rl.isMouseButtonDown(rl.MouseButton.left)) {
             std.debug.print("mouse pos {}\n", .{rl.getMousePosition()});

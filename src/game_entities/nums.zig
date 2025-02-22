@@ -46,7 +46,7 @@ pub const Nums = struct {
         allocator.free(self.drawables);
     }
 
-    pub fn draw(self: *Nums, pos: Pos, char: u8) void {
+    pub fn draw(self: *const Nums, pos: Pos, char: u8) void {
         if (std.ascii.isDigit(char)) {
             const idx: usize = @intCast(char - AsciiNumOffset);
 
