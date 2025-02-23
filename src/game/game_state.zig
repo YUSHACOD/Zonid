@@ -9,18 +9,24 @@ const Moon = @import("../game_entities/moon.zig").Moon;
 const Stars = @import("../game_entities/stars.zig").Stars;
 const Cloud = @import("../game_entities/cloud.zig").Cloud;
 const Ground = @import("../game_entities/ground.zig").Ground;
-const BigTrees = @import("../game_entities/big_trees.zig").BigTrees;
-const SmallTrees = @import("../game_entities/small_trees.zig").SmallTrees;
+const BigTreesAsset = @import("../game_entities/big_trees.zig").BigTreesAsset;
+const SmallTreesAsset = @import("../game_entities/small_trees.zig").SmallTreesAsset;
 const HiScoreTitle = @import("../game_entities/hi.zig").HiScoreTitle;
 const GameOverTitle = @import("../game_entities/game_over.zig").GameOverTitle;
 
 const Dino = @import("../dino/dino.zig").Dino;
 const Score = @import("./score.zig").Score;
 const Bird = @import("../game_entities/bird.zig").Bird;
+const Obstacle = @import("./obstacle.zig").Obstacle;
+const Obstacles = @import("./obstacle.zig").Obstacles;
+const ObstacleActor = @import("./obstacle.zig").ObstacleActor;
 
 const HiScorePos = rl.Vector2.init(1350, 37);
 const CurrScorePos = rl.Vector2.init(1640, 37);
 const HiScoreTitlePos = rl.Vector2.init(1300, 37);
+const GroundPos = @import("../dino/dino.zig").GroundPos;
+
+const obstacle = @import("./obstacle.zig");
 
 pub const DinoGameState = struct {
     // Actors
@@ -30,13 +36,15 @@ pub const DinoGameState = struct {
     current_score: Score,
     ground: Ground,
     moon: Moon,
+    obstacle: Obstacle,
+    obstacle_actor: ObstacleActor,
     // ----------------------------
 
     // Actor Assets
     // ----------------------------
     nums_asset: Nums,
-    big_trees_asset: BigTrees,
-    small_trees_asset: SmallTrees,
+    big_trees_asset: BigTreesAsset,
+    small_trees_asset: SmallTreesAsset,
     bird_asset: BirdAsset,
     cloud_asset: Cloud,
     stars_asset: Stars,
@@ -53,17 +61,24 @@ pub const DinoGameState = struct {
     dino_animation_speed: f32 = 0.1,
     // ----------------------------
 
-    // Text Assets
+    // Other fields
+    // ----------------------------
+    screen_dimension: rl.Vector2,
+    // ----------------------------
+
+    // Init Deinit
     // ------------------------------------------------------------
-    pub fn init(allocator: std.mem.Allocator) anyerror!DinoGameState {
+    pub fn init(allocator: std.mem.Allocator, dimensions: rl.Vector2) anyerror!DinoGameState {
         const nums_asset = try Nums.init(allocator);
-        const big_trees_asset = try BigTrees.init(allocator);
-        const small_trees_asset = try SmallTrees.init(allocator);
+        const big_trees_asset = try BigTreesAsset.init(allocator);
+        const small_trees_asset = try SmallTreesAsset.init(allocator);
         const bird_asset = try BirdAsset.init(allocator);
         const cloud_asset = try Cloud.init();
         const stars_asset = try Stars.init(allocator);
         const game_over_title = try GameOverTitle.init();
         const hi_title = try HiScoreTitle.init(HiScoreTitlePos);
+
+        const init_obstacle = obstacle.getRandomObstacle();
 
         return DinoGameState{
             // Asset Initialization
@@ -92,6 +107,17 @@ pub const DinoGameState = struct {
             .ground = try Ground.init(),
             .moon = try Moon.init(allocator),
             // ----------------------------
+
+            //
+            // ----------------------------
+            .screen_dimension = dimensions,
+            .obstacle = init_obstacle,
+            .obstacle_actor = obstacle.getObstacleActor(
+                init_obstacle,
+                dimensions.x,
+                GroundPos,
+            ),
+            // ----------------------------
         };
     }
 
@@ -108,4 +134,59 @@ pub const DinoGameState = struct {
         self.stars_asset.deinit(allocator);
     }
     // ------------------------------------------------------------
+
+    pub fn updateObstacles(self: *DinoGameState) void {
+        switch (self.obstacle) {
+            Obstacles.Bird => {
+                self.obstacle_actor.Bird.updateAnimation(self.ground.scroll_speed);
+
+                if (self.obstacle_actor.Bird.pos.x <= -self.bird_asset.width) {
+                    self.obstacle = obstacle.getRandomObstacle();
+                    self.obstacle_actor = obstacle.getObstacleActor(
+                        self.obstacle,
+                        self.screen_dimension.x,
+                        GroundPos,
+                    );
+                }
+            },
+            Obstacles.BigTree => {
+                self.obstacle_actor.BigTree.updateAnimation(self.ground.scroll_speed);
+
+                if (self.obstacle_actor.BigTree.pos.x <= -self.big_trees_asset.width) {
+                    self.obstacle = obstacle.getRandomObstacle();
+                    self.obstacle_actor = obstacle.getObstacleActor(
+                        self.obstacle,
+                        self.screen_dimension.x,
+                        GroundPos,
+                    );
+                }
+            },
+            Obstacles.SmallTree => {
+                self.obstacle_actor.SmallTree.updateAnimation(self.ground.scroll_speed);
+
+                if (self.obstacle_actor.SmallTree.pos.x <= -self.big_trees_asset.width) {
+                    self.obstacle = obstacle.getRandomObstacle();
+                    self.obstacle_actor = obstacle.getObstacleActor(
+                        self.obstacle,
+                        self.screen_dimension.x,
+                        GroundPos,
+                    );
+                }
+            },
+        }
+    }
+
+    pub fn drawObstacles(self: *DinoGameState) void {
+        switch (self.obstacle) {
+            Obstacles.Bird => {
+                self.obstacle_actor.Bird.draw(&self.bird_asset);
+            },
+            Obstacles.BigTree => {
+                self.obstacle_actor.BigTree.draw(&self.big_trees_asset);
+            },
+            Obstacles.SmallTree => {
+                self.obstacle_actor.SmallTree.draw(&self.small_trees_asset);
+            },
+        }
+    }
 };

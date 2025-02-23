@@ -8,7 +8,7 @@ const ResourcePath = "./resources/images/misc/ground.png";
 
 pub const Ground = struct {
     pos: rl.Vector2 = rl.Vector2.init(0, 0),
-    scroll_speed: f32 = 3.0,
+    scroll_speed: f32 = 4.0,
     width_start: f32 = 0.0,
     image: Drawable,
     width: f32,

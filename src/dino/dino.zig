@@ -15,6 +15,8 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/dinos/dino_blind.png",
 };
 
+pub const GroundPos: f32 = 620;
+
 const DinoPos: rl.Vector2 = utils.init(380, 620);
 const DinoAnimationSpeed: f32 = 0.1;
 

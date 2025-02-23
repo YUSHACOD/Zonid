@@ -9,22 +9,53 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/bird/b_wing_up.png",
 };
 
+const BirdAnimationSpeed: f32 = 0.1;
+
+pub const ObstaclePositions = [_]f32{ 500, 525, 580 };
+
+pub const Len: usize = ObstaclePositions.len - 1;
+
 pub const Bird = struct {
-    assets: *BirdAsset,
+    pos: rl.Vector2,
+    state_change_time: f32 = 0.0,
     state: usize = 0,
 
-    pub fn init(bird_asset: *BirdAsset) Bird {
+    pub fn init(
+        max_width: f32,
+        obstacle_position: usize,
+    ) Bird {
+        std.debug.print("max_width: {} \n", .{max_width});
+
         return Bird{
-            .assets = bird_asset,
+            .pos = rl.Vector2{
+                .x = max_width,
+                .y = ObstaclePositions[obstacle_position],
+            },
         };
     }
 
     pub fn incrementState(self: *Bird) void {
-        self.assets.drawables[self.state] = (self.state + 1) % ResourcePaths.len;
+        self.state = (self.state + 1) % ResourcePaths.len;
     }
 
-    pub fn draw(self: *Bird, pos: rl.Vector2) void {
-        self.assets.drawables[self.state].draw(pos);
+    pub fn updateAnimation(self: *Bird, scroll_speed: f32) void {
+        self.state_change_time += rl.getFrameTime();
+
+        if (self.state_change_time >= BirdAnimationSpeed) {
+            self.incrementState();
+            self.state_change_time = 0.0;
+        }
+
+        self.pos.x -= scroll_speed;
+    }
+
+    pub fn draw(self: *Bird, bird_asset: *BirdAsset) void {
+        const adjusted_pos = utils.adjustPosHeight(
+            self.pos,
+            bird_asset.height,
+        );
+
+        bird_asset.drawables[self.state].draw(adjusted_pos);
     }
 };
 

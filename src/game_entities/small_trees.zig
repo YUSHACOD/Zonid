@@ -13,13 +13,49 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/small_tree/small_tree_6.png",
 };
 
-pub const SmallTrees = struct {
-    drawables: []Drawable,
+pub const Len: usize = ResourcePaths.len - 1;
+
+pub const SmallTree = struct {
+    pos: rl.Vector2,
     state: usize = 0,
+
+    pub fn init(
+        max_width: f32,
+        resource_position: usize,
+        ground_position: f32,
+    ) SmallTree {
+        std.debug.print("max_width: {} \n", .{max_width});
+
+        return SmallTree{
+            .pos = rl.Vector2{
+                .x = max_width,
+                .y = ground_position,
+            },
+            .state = resource_position,
+        };
+    }
+
+    pub fn updateAnimation(self: *SmallTree, scroll_speed: f32) void {
+        self.pos.x -= scroll_speed;
+    }
+
+    pub fn draw(self: *SmallTree, bird_asset: *SmallTreesAsset) void {
+        const adjusted_pos = utils.adjustPosWidth(
+            self.pos,
+            bird_asset.width,
+            bird_asset.height,
+        );
+
+        bird_asset.drawables[self.state].draw(adjusted_pos);
+    }
+};
+
+pub const SmallTreesAsset = struct {
+    drawables: []Drawable,
     width: f32,
     height: f32,
 
-    pub fn init(allocator: std.mem.Allocator) anyerror!SmallTrees {
+    pub fn init(allocator: std.mem.Allocator) anyerror!SmallTreesAsset {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
         errdefer allocator.free(drawables);
 
@@ -27,25 +63,21 @@ pub const SmallTrees = struct {
             drawables[i] = try Drawable.init(resource, null);
         }
 
-        return SmallTrees{
+        return SmallTreesAsset{
             .drawables = drawables,
             .width = @floatFromInt(drawables[0].texture.width),
             .height = @floatFromInt(drawables[0].texture.height),
         };
     }
 
-    pub fn deinit(self: *SmallTrees, allocator: std.mem.Allocator) void {
+    pub fn deinit(self: *SmallTreesAsset, allocator: std.mem.Allocator) void {
         for (self.drawables) |entity| {
             entity.deinit();
         }
         allocator.free(self.drawables);
     }
 
-    pub fn incrementState(self: *SmallTrees) void {
-        self.state = (self.state + 1) % ResourcePaths.len;
-    }
-
-    pub fn draw(self: *SmallTrees, pos: rl.Vector2) void {
+    pub fn draw(self: *SmallTreesAsset, pos: rl.Vector2) void {
         self.drawables[self.state].draw(pos);
     }
 };

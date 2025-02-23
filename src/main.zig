@@ -17,8 +17,8 @@ pub fn main() anyerror!void {
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    const screenWidth = 1920;
-    const screenHeight = 1080;
+    const screenWidth: i32 = 1920;
+    const screenHeight: i32 = 1080;
 
     // Window Context setup
     rl.initWindow(screenWidth, screenHeight, "Ozid, the reverse dino");
@@ -32,7 +32,10 @@ pub fn main() anyerror!void {
     // Texture Setup
     // Alway create textures after window init you stupid fuck !!!!
     //--------------------------------------------------------------------------------------
-    var game_state = try DinoGameState.init(allocator);
+    var game_state = try DinoGameState.init(allocator, rl.Vector2.init(
+        @floatFromInt(screenWidth),
+        @floatFromInt(screenHeight),
+    ));
     defer game_state.deinit(allocator);
     //--------------------------------------------------------------------------------------
 
@@ -55,18 +58,15 @@ pub fn main() anyerror!void {
             rl.KeyboardKey.five => game_state.dino.changeState(DinoStates.Blind),
             rl.KeyboardKey.nine => game_state.dino_animation_speed += 0.1,
             rl.KeyboardKey.zero => game_state.dino_animation_speed -= 0.1,
-            rl.KeyboardKey.o => game_state.bird_asset.incrementState(),
             rl.KeyboardKey.n => game_state.moon.incrementState(),
             rl.KeyboardKey.j => game_state.stars_asset.incrementState(),
-            rl.KeyboardKey.u => game_state.big_trees_asset.incrementState(),
-            rl.KeyboardKey.i => game_state.small_trees_asset.incrementState(),
             else => {},
         }
 
         game_state.dino.updateAnimation();
-        utils.updateWithMousePos(&game_state.dino.pos);
 
         game_state.ground.updateGroundScroll();
+        game_state.updateObstacles();
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -87,13 +87,9 @@ pub fn main() anyerror!void {
 
             game_state.dino.drawSelf();
 
-            game_state.bird_asset.draw(rl.Vector2.init(5, 5));
             game_state.moon.draw(rl.Vector2.init(300, 5));
             game_state.stars_asset.draw(rl.Vector2.init(400, 5));
             game_state.cloud_asset.draw(rl.Vector2.init(700, 5));
-
-            game_state.big_trees_asset.draw(rl.Vector2.init(780, 625));
-            game_state.small_trees_asset.draw(rl.Vector2.init(567, 600));
 
             game_state.game_over_title.draw(rl.Vector2.init(400, 200));
 
@@ -102,6 +98,7 @@ pub fn main() anyerror!void {
             try game_state.hi_score.drawScore(allocator, &game_state.nums_asset);
 
             game_state.ground.drawGroundScroll();
+            game_state.drawObstacles();
 
             // try game_state.score.drawScore(allocator);
         }
