@@ -93,40 +93,68 @@ pub const Dino = struct {
     pub fn updateAnimation(self: *Dino) void {
         const time_elapsed: f32 = rl.getFrameTime();
 
-        // State Change
-        // -------------------------------------------
-        self.state_change_time += rl.getFrameTime();
-        if (self.state_change_time >= DinoAnimationSpeed) {
-            self.incrementState();
-            self.state_change_time = 0.0;
-        }
-        // -------------------------------------------
+        if ((self.state != DinoStates.Idle or
+            self.is_jumping) and
+            self.state != DinoStates.Shocked)
+        {
+            // State Change
+            // -------------------------------------------
+            self.state_change_time += rl.getFrameTime();
+            if (self.state_change_time >= DinoAnimationSpeed) {
+                self.incrementState();
+                self.state_change_time = 0.0;
+            }
+            // -------------------------------------------
 
-        // Position Update
-        // -------------------------------------------
-        // Gravity
-        const displacement: rl.Vector2 = utils.displacement(self.velocity, Gravity, time_elapsed);
-        // New Velocity
-        self.velocity = utils.newVelocity(self.velocity, Gravity, time_elapsed);
-        self.pos = self.pos.add(displacement);
-        // -------------------------------------------
+            // Position Update
+            // -------------------------------------------
+            // Gravity
+            const displacement: rl.Vector2 = utils.displacement(self.velocity, Gravity, time_elapsed);
+            // New Velocity
+            self.velocity = utils.newVelocity(self.velocity, Gravity, time_elapsed);
+            self.pos = self.pos.add(displacement);
+            // -------------------------------------------
 
-        // Ground Collision
-        // -------------------------------------------
-        if (self.pos.y >= DinoPos.y) {
-            self.pos.y = DinoPos.y;
-            self.velocity = rl.Vector2.init(0, 0);
-            self.is_jumping = false;
-        }
-        // -------------------------------------------
+            // Ground Collision
+            // -------------------------------------------
+            if (self.pos.y >= DinoPos.y) {
+                self.pos.y = DinoPos.y;
+                self.velocity = rl.Vector2.init(0, 0);
+                self.is_jumping = false;
 
-        // Jump
-        // -------------------------------------------
-        if (rl.isKeyPressed(rl.KeyboardKey.space) and !self.is_jumping) {
-            self.is_jumping = true;
-            self.velocity = JumpVelocity;
+                if (self.state != DinoStates.Running and self.state != DinoStates.Crawling) {
+                    self.changeState(DinoStates.Running);
+                }
+            }
+            // -------------------------------------------
+
+            // Jump
+            // -------------------------------------------
+            if (rl.isKeyPressed(rl.KeyboardKey.space) and !self.is_jumping) {
+                self.is_jumping = true;
+                self.velocity = JumpVelocity;
+            }
+
+            if (self.pos.y != DinoPos.y and self.state != DinoStates.Idle) {
+                self.changeState(DinoStates.Idle);
+            }
+            // -------------------------------------------
+
+            // Crawling
+            // -------------------------------------------
+            if (!self.is_jumping) {
+                if (rl.isKeyDown(rl.KeyboardKey.down)) {
+                    if (self.state != DinoStates.Crawling) {
+                        self.changeState(DinoStates.Crawling);
+                    }
+                }
+
+                if (rl.isKeyReleased(rl.KeyboardKey.down) and self.state == DinoStates.Crawling) {
+                    self.changeState(DinoStates.Running);
+                }
+            }
+            // -------------------------------------------
         }
-        // -------------------------------------------
     }
 
     pub fn draw(self: *Dino, pos: rl.Vector2) void {
