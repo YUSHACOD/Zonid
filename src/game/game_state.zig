@@ -27,6 +27,9 @@ const HiScorePos = rl.Vector2.init(1350, 37);
 const CurrScorePos = rl.Vector2.init(1640, 37);
 const HiScoreTitlePos = rl.Vector2.init(1300, 37);
 const GroundPos = @import("../dino/dino.zig").GroundPos;
+const GameOverTitlePos: rl.Vector2 = rl.Vector2.init(960, 250);
+
+const ScoreUpdateFrequency: u8 = 2;
 
 const obstacle = @import("./obstacle.zig");
 
@@ -68,6 +71,7 @@ pub const DinoGameState = struct {
     screen_dimension: rl.Vector2,
     game_started: bool = false,
     game_ended: bool = false,
+    update_count: u8 = 0,
     // ----------------------------
 
     // Init Deinit
@@ -101,11 +105,11 @@ pub const DinoGameState = struct {
             // ----------------------------
             .dino = try Dino.init(allocator),
             .hi_score = Score{
-                .value = 123456789,
+                .value = 0,
                 .pos = HiScorePos,
             },
             .current_score = Score{
-                .value = 123456789,
+                .value = 0,
                 .pos = CurrScorePos,
             },
             .ground = try Ground.init(),
@@ -149,6 +153,23 @@ pub const DinoGameState = struct {
             }
         }
 
+        if (self.game_ended) {
+            if (rl.isKeyPressed(rl.KeyboardKey.r)) {
+                self.game_ended = false;
+                self.dino.changeState(DinoStates.Running);
+
+                const init_obstacle = obstacle.getRandomObstacle();
+                self.obstacle = init_obstacle;
+                self.obstacle_actor = obstacle.getObstacleActor(
+                    init_obstacle,
+                    self.screen_dimension.x,
+                    GroundPos,
+                );
+
+                self.current_score.value = 0;
+            }
+        }
+
         if (self.game_started and !self.game_ended) {
             switch (rl.getKeyPressed()) {
                 rl.KeyboardKey.one => self.dino.changeState(DinoStates.Idle),
@@ -163,11 +184,26 @@ pub const DinoGameState = struct {
                 else => {},
             }
 
+            self.updateScore();
+
             self.dino.updateAnimation();
 
             self.ground.updateGroundScroll();
             self.updateObstacles();
             self.updateCollision();
+        }
+    }
+
+    fn updateScore(self: *DinoGameState) void {
+        self.update_count += 1;
+
+        if (self.update_count >= ScoreUpdateFrequency) {
+            self.update_count = 0;
+            self.current_score.value += 1;
+        }
+
+        if (self.current_score.value > self.hi_score.value) {
+            self.hi_score.value = self.current_score.value;
         }
     }
 
@@ -234,6 +270,26 @@ pub const DinoGameState = struct {
 
     // Draws
     // ------------------------------------------------------------
+    pub fn drawAll(self: *DinoGameState, allocator: std.mem.Allocator) anyerror!void {
+        self.dino.drawSelf();
+
+        self.ground.drawGroundScroll();
+        self.drawObstacles();
+
+        const adjusted_pos = utils.adjustPosMiddle(
+            GameOverTitlePos,
+            self.game_over_title.width,
+            self.game_over_title.height,
+        );
+        if (self.game_ended) {
+            self.game_over_title.draw(adjusted_pos);
+        }
+
+        self.hi_title.drawSelf();
+        try self.current_score.drawScore(allocator, &self.nums_asset);
+        try self.hi_score.drawScore(allocator, &self.nums_asset);
+    }
+
     pub fn drawObstacles(self: *DinoGameState) void {
         switch (self.obstacle) {
             Obstacles.Bird => {

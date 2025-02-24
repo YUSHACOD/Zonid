@@ -39,6 +39,7 @@ pub fn main() anyerror!void {
     defer game_state.deinit(allocator);
     //--------------------------------------------------------------------------------------
 
+    // Texture Target
     const target: rl.RenderTexture2D = try rl.loadRenderTexture(screenWidth, screenHeight);
     defer rl.unloadRenderTexture(target);
 
@@ -59,32 +60,14 @@ pub fn main() anyerror!void {
             rl.beginDrawing();
             defer rl.endDrawing();
 
-            {
+            { // Begin Shader Mode
                 rl.beginShaderMode(shader);
                 defer rl.endShaderMode();
 
                 rl.drawTextureEx(target.texture, rl.Vector2{ .x = 0.0, .y = 0.0 }, 0.0, 1.0, rl.Color.white);
-            }
+            } // End Shader Mode
 
-            rl.drawLine(0, @divFloor(screenHeight, 2), screenWidth, @divFloor(screenHeight, 2), rl.Color.black);
-            rl.drawLine(@divFloor(screenWidth, 2), 0, @divFloor(screenWidth, 2), screenHeight, rl.Color.black);
-
-            game_state.dino.drawSelf();
-
-            game_state.moon.draw(rl.Vector2.init(300, 5));
-            game_state.stars_asset.draw(rl.Vector2.init(400, 5));
-            game_state.cloud_asset.draw(rl.Vector2.init(700, 5));
-
-            game_state.game_over_title.draw(rl.Vector2.init(400, 200));
-
-            game_state.hi_title.drawSelf();
-            try game_state.current_score.drawScore(allocator, &game_state.nums_asset);
-            try game_state.hi_score.drawScore(allocator, &game_state.nums_asset);
-
-            game_state.ground.drawGroundScroll();
-            game_state.drawObstacles();
-
-            // try game_state.score.drawScore(allocator);
+            try game_state.drawAll(allocator);
         }
         //----------------------------------------------------------------------------------
     }
