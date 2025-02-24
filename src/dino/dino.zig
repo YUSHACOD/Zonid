@@ -80,6 +80,8 @@ pub const Dino = struct {
     pub fn changeState(self: *Dino, state: DinoStates) void {
         self.state = state;
         self.state_idx = state.updateIndex();
+        self.width = @floatFromInt(self.drawables[self.state_idx].texture.width);
+        self.height = @floatFromInt(self.drawables[self.state_idx].texture.height);
     }
 
     pub fn incrementState(self: *Dino) void {
@@ -90,6 +92,21 @@ pub const Dino = struct {
             DinoStates.Shocked => self.state_idx = if (self.state_idx == 5) 6 else 5,
             DinoStates.Blind => self.state_idx = 7,
         }
+    }
+
+    pub fn getRec(self: *Dino) rl.Rectangle {
+        const mid_adjustedPos: rl.Vector2 = utils.adjustPosWidth(
+            self.pos,
+            self.width,
+            self.height,
+        );
+
+        return rl.Rectangle.init(
+            mid_adjustedPos.x,
+            mid_adjustedPos.y,
+            self.width,
+            self.height,
+        );
     }
 
     pub fn updateAnimation(self: *Dino) void {

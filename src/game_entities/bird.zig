@@ -34,6 +34,20 @@ pub const Bird = struct {
         };
     }
 
+    pub fn getRec(self: Bird, bird_asset: *const BirdAsset) rl.Rectangle {
+        const adjusted_pos = utils.adjustPosHeight(
+            self.pos,
+            bird_asset.height,
+        );
+
+        return rl.Rectangle.init(
+            adjusted_pos.x,
+            adjusted_pos.y,
+            bird_asset.width,
+            bird_asset.height,
+        );
+    }
+
     pub fn incrementState(self: *Bird) void {
         self.state = (self.state + 1) % ResourcePaths.len;
     }

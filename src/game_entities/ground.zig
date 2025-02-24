@@ -6,9 +6,11 @@ const utils = @import("../utils/utils.zig");
 
 const ResourcePath = "./resources/images/misc/ground.png";
 
+const ScrollSpeed: f32 = 6.0;
+
 pub const Ground = struct {
     pos: rl.Vector2 = rl.Vector2.init(0, 0),
-    scroll_speed: f32 = 4.0,
+    scroll_speed: f32 = ScrollSpeed,
     width_start: f32 = 0.0,
     image: Drawable,
     width: f32,

@@ -35,18 +35,33 @@ pub const SmallTree = struct {
         };
     }
 
+    pub fn getRec(self: SmallTree, small_tree_asset: *SmallTreesAsset) rl.Rectangle {
+        const adjusted_pos = utils.adjustPosWidth(
+            self.pos,
+            small_tree_asset.width,
+            small_tree_asset.height,
+        );
+
+        return rl.Rectangle.init(
+            adjusted_pos.x,
+            adjusted_pos.y,
+            small_tree_asset.width,
+            small_tree_asset.height,
+        );
+    }
+
     pub fn updateAnimation(self: *SmallTree, scroll_speed: f32) void {
         self.pos.x -= scroll_speed;
     }
 
-    pub fn draw(self: *SmallTree, bird_asset: *SmallTreesAsset) void {
+    pub fn draw(self: *SmallTree, small_tree_asset: *SmallTreesAsset) void {
         const adjusted_pos = utils.adjustPosWidth(
             self.pos,
-            bird_asset.width,
-            bird_asset.height,
+            small_tree_asset.width,
+            small_tree_asset.height,
         );
 
-        bird_asset.drawables[self.state].draw(adjusted_pos);
+        small_tree_asset.drawables[self.state].draw(adjusted_pos);
     }
 };
 

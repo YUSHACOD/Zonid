@@ -9,6 +9,10 @@ const Bird = @import("../game_entities/bird.zig").Bird;
 const BigTree = @import("../game_entities/big_trees.zig").BigTree;
 const SmallTree = @import("../game_entities/small_trees.zig").SmallTree;
 
+const BirdAsset = @import("../game_entities/bird.zig").BirdAsset;
+const BigTreesAsset = @import("../game_entities/big_trees.zig").BigTreesAsset;
+const SmallTreesAsset = @import("../game_entities/small_trees.zig").SmallTreesAsset;
+
 pub const Obstacles = enum { Bird, BigTree, SmallTree };
 
 pub const Obstacle = union(Obstacles) {
@@ -43,11 +47,24 @@ fn getRandomSmallTree() Obstacle {
     };
 }
 
-pub const ObstacleActor = union {
+pub const ObstacleActor = union(Obstacles) {
     Bird: Bird,
     BigTree: BigTree,
     SmallTree: SmallTree,
 };
+
+pub fn getRectangle(
+    actor: ObstacleActor,
+    bird_asset: *const BirdAsset,
+    big_tree_asset: *BigTreesAsset,
+    small_tree_aseet: *SmallTreesAsset,
+) rl.Rectangle {
+    return switch (actor) {
+        Obstacles.Bird => actor.Bird.getRec(bird_asset),
+        Obstacles.BigTree => actor.BigTree.getRec(big_tree_asset),
+        Obstacles.SmallTree => actor.SmallTree.getRec(small_tree_aseet),
+    };
+}
 
 pub fn getObstacleActor(obstacle: Obstacle, max_width: f32, ground_position: f32) ObstacleActor {
     return switch (obstacle) {

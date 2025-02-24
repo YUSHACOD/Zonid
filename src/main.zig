@@ -50,23 +50,7 @@ pub fn main() anyerror!void {
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
         // Update
         //----------------------------------------------------------------------------------
-        switch (rl.getKeyPressed()) {
-            rl.KeyboardKey.one => game_state.dino.changeState(DinoStates.Idle),
-            rl.KeyboardKey.two => game_state.dino.changeState(DinoStates.Running),
-            rl.KeyboardKey.three => game_state.dino.changeState(DinoStates.Crawling),
-            rl.KeyboardKey.four => game_state.dino.changeState(DinoStates.Shocked),
-            rl.KeyboardKey.five => game_state.dino.changeState(DinoStates.Blind),
-            rl.KeyboardKey.nine => game_state.dino_animation_speed += 0.1,
-            rl.KeyboardKey.zero => game_state.dino_animation_speed -= 0.1,
-            rl.KeyboardKey.n => game_state.moon.incrementState(),
-            rl.KeyboardKey.j => game_state.stars_asset.incrementState(),
-            else => {},
-        }
-
-        game_state.dino.updateAnimation();
-
-        game_state.ground.updateGroundScroll();
-        game_state.updateObstacles();
+        game_state.updateAll();
         //----------------------------------------------------------------------------------
 
         // Draw

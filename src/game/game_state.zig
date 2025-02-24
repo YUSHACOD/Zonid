@@ -21,6 +21,8 @@ const Obstacle = @import("./obstacle.zig").Obstacle;
 const Obstacles = @import("./obstacle.zig").Obstacles;
 const ObstacleActor = @import("./obstacle.zig").ObstacleActor;
 
+const DinoStates = @import("../dino/dino.zig").DinoStates;
+
 const HiScorePos = rl.Vector2.init(1350, 37);
 const CurrScorePos = rl.Vector2.init(1640, 37);
 const HiScoreTitlePos = rl.Vector2.init(1300, 37);
@@ -64,6 +66,8 @@ pub const DinoGameState = struct {
     // Other fields
     // ----------------------------
     screen_dimension: rl.Vector2,
+    game_started: bool = false,
+    game_ended: bool = false,
     // ----------------------------
 
     // Init Deinit
@@ -135,7 +139,58 @@ pub const DinoGameState = struct {
     }
     // ------------------------------------------------------------
 
-    pub fn updateObstacles(self: *DinoGameState) void {
+    // Updates
+    // ------------------------------------------------------------
+    pub fn updateAll(self: *DinoGameState) void {
+        if (!self.game_started) {
+            if (rl.isKeyPressed(rl.KeyboardKey.space)) {
+                self.game_started = true;
+                self.dino.changeState(DinoStates.Running);
+            }
+        }
+
+        if (self.game_started and !self.game_ended) {
+            switch (rl.getKeyPressed()) {
+                rl.KeyboardKey.one => self.dino.changeState(DinoStates.Idle),
+                rl.KeyboardKey.two => self.dino.changeState(DinoStates.Running),
+                rl.KeyboardKey.three => self.dino.changeState(DinoStates.Crawling),
+                rl.KeyboardKey.four => self.dino.changeState(DinoStates.Shocked),
+                rl.KeyboardKey.five => self.dino.changeState(DinoStates.Blind),
+                rl.KeyboardKey.nine => self.dino_animation_speed += 0.1,
+                rl.KeyboardKey.zero => self.dino_animation_speed -= 0.1,
+                rl.KeyboardKey.n => self.moon.incrementState(),
+                rl.KeyboardKey.j => self.stars_asset.incrementState(),
+                else => {},
+            }
+
+            self.dino.updateAnimation();
+
+            self.ground.updateGroundScroll();
+            self.updateObstacles();
+            self.updateCollision();
+        }
+    }
+
+    fn updateCollision(self: *DinoGameState) void {
+        const obstacle_rec: rl.Rectangle = obstacle.getRectangle(
+            self.obstacle_actor,
+            &self.bird_asset,
+            &self.big_trees_asset,
+            &self.small_trees_asset,
+        );
+        const dino_rec: rl.Rectangle = self.dino.getRec();
+        const collision: bool = rl.checkCollisionRecs(
+            dino_rec,
+            obstacle_rec,
+        );
+
+        if (collision) {
+            self.dino.changeState(DinoStates.Shocked);
+            self.game_ended = true;
+        }
+    }
+
+    fn updateObstacles(self: *DinoGameState) void {
         switch (self.obstacle) {
             Obstacles.Bird => {
                 self.obstacle_actor.Bird.updateAnimation(self.ground.scroll_speed);
@@ -175,7 +230,10 @@ pub const DinoGameState = struct {
             },
         }
     }
+    // ------------------------------------------------------------
 
+    // Draws
+    // ------------------------------------------------------------
     pub fn drawObstacles(self: *DinoGameState) void {
         switch (self.obstacle) {
             Obstacles.Bird => {
@@ -189,4 +247,5 @@ pub const DinoGameState = struct {
             },
         }
     }
+    // ------------------------------------------------------------
 };

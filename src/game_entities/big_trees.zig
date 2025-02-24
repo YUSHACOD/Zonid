@@ -34,18 +34,33 @@ pub const BigTree = struct {
         };
     }
 
+    pub fn getRec(self: BigTree, big_tree_asset: *BigTreesAsset) rl.Rectangle {
+        const adjusted_pos = utils.adjustPosWidth(
+            self.pos,
+            big_tree_asset.width,
+            big_tree_asset.height,
+        );
+
+        return rl.Rectangle.init(
+            adjusted_pos.x,
+            adjusted_pos.y,
+            big_tree_asset.width,
+            big_tree_asset.height,
+        );
+    }
+
     pub fn updateAnimation(self: *BigTree, scroll_speed: f32) void {
         self.pos.x -= scroll_speed;
     }
 
-    pub fn draw(self: *BigTree, bird_asset: *BigTreesAsset) void {
+    pub fn draw(self: *BigTree, big_tree_asset: *BigTreesAsset) void {
         const adjusted_pos = utils.adjustPosWidth(
             self.pos,
-            bird_asset.width,
-            bird_asset.height,
+            big_tree_asset.width,
+            big_tree_asset.height,
         );
 
-        bird_asset.drawables[self.state].draw(adjusted_pos);
+        big_tree_asset.drawables[self.state].draw(adjusted_pos);
     }
 };
 
