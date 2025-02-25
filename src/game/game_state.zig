@@ -30,6 +30,7 @@ const GroundPos = @import("../dino/dino.zig").GroundPos;
 const GameOverTitlePos: rl.Vector2 = rl.Vector2.init(960, 250);
 
 const ScoreUpdateFrequency: u8 = 2;
+pub const Direction: f32 = -1;
 
 const obstacle = @import("./obstacle.zig");
 const Circle = obstacle.Circle;
@@ -235,11 +236,19 @@ pub const DinoGameState = struct {
             Obstacles.Bird => {
                 self.obstacle_actor.Bird.updateAnimation(self.ground.scroll_speed);
 
-                if (self.obstacle_actor.Bird.pos.x <= -self.bird_asset.width) {
+                const left_bound = self.obstacle_actor.Bird.pos.x < -self.bird_asset.width;
+                const right_bound = self.obstacle_actor.Bird.pos.x > self.screen_dimension.x;
+
+                const start_position = if (Direction == 1)
+                    self.screen_dimension.x
+                else
+                    -self.bird_asset.width;
+
+                if (left_bound or right_bound) {
                     self.obstacle = obstacle.getRandomObstacle();
                     self.obstacle_actor = obstacle.getObstacleActor(
                         self.obstacle,
-                        self.screen_dimension.x,
+                        start_position,
                         GroundPos,
                     );
                 }
@@ -247,13 +256,21 @@ pub const DinoGameState = struct {
             Obstacles.BigTree => {
                 self.obstacle_actor.BigTree.updateAnimation(self.ground.scroll_speed);
 
-                if (self.obstacle_actor.BigTree.pos.x <= -self.big_trees_asset.width(
-                    self.obstacle_actor.BigTree.state,
-                )) {
+                const left_bound = self.obstacle_actor.BigTree.pos.x <
+                    -self.big_trees_asset.width(self.obstacle_actor.BigTree.state);
+
+                const right_bound = self.obstacle_actor.BigTree.pos.x > self.screen_dimension.x;
+
+                const start_position = if (Direction == 1)
+                    self.screen_dimension.x
+                else
+                    -self.big_trees_asset.width(self.obstacle_actor.BigTree.state);
+
+                if (left_bound or right_bound) {
                     self.obstacle = obstacle.getRandomObstacle();
                     self.obstacle_actor = obstacle.getObstacleActor(
                         self.obstacle,
-                        self.screen_dimension.x,
+                        start_position,
                         GroundPos,
                     );
                 }
@@ -261,11 +278,19 @@ pub const DinoGameState = struct {
             Obstacles.SmallTree => {
                 self.obstacle_actor.SmallTree.updateAnimation(self.ground.scroll_speed);
 
-                if (self.obstacle_actor.SmallTree.pos.x <= -self.small_trees_asset.width) {
+                const left_bound = self.obstacle_actor.SmallTree.pos.x < -self.small_trees_asset.width;
+                const right_bound = self.obstacle_actor.SmallTree.pos.x > self.screen_dimension.x;
+
+                const start_position = if (Direction == 1)
+                    self.screen_dimension.x
+                else
+                    -self.small_trees_asset.width;
+
+                if (left_bound or right_bound) {
                     self.obstacle = obstacle.getRandomObstacle();
                     self.obstacle_actor = obstacle.getObstacleActor(
                         self.obstacle,
-                        self.screen_dimension.x,
+                        start_position,
                         GroundPos,
                     );
                 }
