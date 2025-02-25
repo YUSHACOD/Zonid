@@ -29,7 +29,13 @@ const HiScoreTitlePos = rl.Vector2.init(1300, 37);
 const GroundPos = @import("../dino/dino.zig").GroundPos;
 const GameOverTitlePos: rl.Vector2 = rl.Vector2.init(960, 250);
 
+const CloudPositions = @import("../game_entities/cloud.zig").CloudPositions;
+const StarPositions = @import("../game_entities/stars.zig").StarPositions;
+const StarStates = @import("../game_entities/stars.zig").StarStates;
+
 const ScoreUpdateFrequency: u8 = 2;
+const SpeedUpdateFrequency: u8 = 128;
+const ScrollSpeed = @import("../game_entities/ground.zig").ScrollSpeed;
 pub const Direction: f32 = -1;
 
 const obstacle = @import("./obstacle.zig");
@@ -169,6 +175,7 @@ pub const DinoGameState = struct {
                 );
 
                 self.current_score.value = 0;
+                self.ground.scroll_speed = Direction * ScrollSpeed;
             }
         }
 
@@ -181,12 +188,10 @@ pub const DinoGameState = struct {
                 rl.KeyboardKey.five => self.dino.changeState(DinoStates.Blind),
                 rl.KeyboardKey.nine => self.dino_animation_speed += 0.1,
                 rl.KeyboardKey.zero => self.dino_animation_speed -= 0.1,
-                rl.KeyboardKey.n => self.moon.incrementState(),
-                rl.KeyboardKey.j => self.stars_asset.incrementState(),
                 else => {},
             }
 
-            self.updateScore();
+            self.updateScoreAndSpeed();
 
             self.dino.updateAnimation();
 
@@ -196,12 +201,24 @@ pub const DinoGameState = struct {
         }
     }
 
-    fn updateScore(self: *DinoGameState) void {
+    fn updateScoreAndSpeed(self: *DinoGameState) void {
         self.update_count += 1;
 
-        if (self.update_count >= ScoreUpdateFrequency) {
-            self.update_count = 0;
+        if (self.update_count % ScoreUpdateFrequency == 0) {
+            // Score
             self.current_score.value += 1;
+        }
+        if (self.update_count % SpeedUpdateFrequency == 0) {
+            self.update_count = 0;
+            // Speed
+            self.ground.scroll_speed += Direction * 0.25;
+
+            // Update Moon state with speed update
+            if (Direction == 1) {
+                self.moon.incrementState();
+            } else {
+                self.moon.decrementState();
+            }
         }
 
         if (self.current_score.value > self.hi_score.value) {
@@ -302,6 +319,8 @@ pub const DinoGameState = struct {
     // Draws
     // ------------------------------------------------------------
     pub fn drawAll(self: *DinoGameState, allocator: std.mem.Allocator) anyerror!void {
+        self.drawScenery();
+
         self.dino.drawSelf();
 
         self.ground.drawGroundScroll();
@@ -319,6 +338,18 @@ pub const DinoGameState = struct {
         self.hi_title.drawSelf();
         try self.current_score.drawScore(allocator, &self.nums_asset);
         try self.hi_score.drawScore(allocator, &self.nums_asset);
+    }
+
+    pub fn drawScenery(self: *DinoGameState) void {
+        for (CloudPositions) |pos| {
+            self.cloud_asset.draw(pos);
+        }
+
+        for (StarPositions, StarStates) |pos, state| {
+            self.stars_asset.draw(pos, state);
+        }
+
+        self.moon.drawSelf();
     }
 
     pub fn drawObstacles(self: *DinoGameState) void {

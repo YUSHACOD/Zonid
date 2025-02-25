@@ -8,7 +8,7 @@ const ResourcePath = "./resources/images/misc/ground.png";
 
 const Direction: f32 = @import("../game/game_state.zig").Direction;
 
-const ScrollSpeed: f32 = 6.0;
+pub const ScrollSpeed: f32 = 6.0;
 
 pub const Ground = struct {
     pos: rl.Vector2 = rl.Vector2.init(0, 0),

@@ -19,7 +19,7 @@ const ResourcePaths = [_][*:0]const u8{
 
 pub const GroundPos: f32 = 620;
 
-const DinoPos: rl.Vector2 = utils.init(380, 620);
+const DinoPos: rl.Vector2 = utils.init(960, 620);
 const DinoAnimationSpeed: f32 = 0.1;
 
 const Gravity: rl.Vector2 = rl.Vector2.init(0, 2000);

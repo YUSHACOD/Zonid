@@ -10,9 +10,22 @@ const ResourcePaths = [_][*:0]const u8{
     "./resources/images/sky/star_3.png",
 };
 
+pub const StarPositions = [_]rl.Vector2{
+    rl.Vector2{ .x = 3.64e2, .y = 1.85e2 },
+    rl.Vector2{ .x = 1.199e3, .y = 2.52e2 },
+    rl.Vector2{ .x = 1.017e3, .y = 3.6e1 },
+    rl.Vector2{ .x = 7.17e2, .y = 8.7e1 },
+    rl.Vector2{ .x = 5.7e1, .y = 3.33e2 },
+    rl.Vector2{ .x = 4e1, .y = 1.53e2 },
+    rl.Vector2{ .x = 1.501e3, .y = 2.16e2 },
+    rl.Vector2{ .x = 1.743e3, .y = 4.06e2 },
+    rl.Vector2{ .x = 1.813e3, .y = 9.5e1 },
+};
+
+pub const StarStates = [_]usize{ 0, 2, 1, 1, 0, 2, 1, 2, 0 };
+
 pub const Stars = struct {
     drawables: []Drawable,
-    state: usize = 0,
     width: f32,
     height: f32,
 
@@ -38,11 +51,7 @@ pub const Stars = struct {
         allocator.free(self.drawables);
     }
 
-    pub fn incrementState(self: *Stars) void {
-        self.state = (self.state + 1) % ResourcePaths.len;
-    }
-
-    pub fn draw(self: *Stars, pos: rl.Vector2) void {
-        self.drawables[self.state].draw(pos);
+    pub fn draw(self: *Stars, pos: rl.Vector2, state: usize) void {
+        self.drawables[state].draw(pos);
     }
 };
