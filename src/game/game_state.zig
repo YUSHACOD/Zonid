@@ -32,6 +32,7 @@ const GameOverTitlePos: rl.Vector2 = rl.Vector2.init(960, 250);
 const ScoreUpdateFrequency: u8 = 2;
 
 const obstacle = @import("./obstacle.zig");
+const Circle = obstacle.Circle;
 
 pub const DinoGameState = struct {
     // Actors
@@ -208,16 +209,19 @@ pub const DinoGameState = struct {
     }
 
     fn updateCollision(self: *DinoGameState) void {
-        const obstacle_rec: rl.Rectangle = obstacle.getRectangle(
+        const obstacle_circle: Circle = obstacle.getCircle(
             self.obstacle_actor,
             &self.bird_asset,
             &self.big_trees_asset,
             &self.small_trees_asset,
         );
-        const dino_rec: rl.Rectangle = self.dino.getRec();
-        const collision: bool = rl.checkCollisionRecs(
-            dino_rec,
-            obstacle_rec,
+        const dino_circle: Circle = self.dino.getCircle();
+
+        const collision: bool = rl.checkCollisionCircles(
+            dino_circle.center,
+            dino_circle.radius,
+            obstacle_circle.center,
+            obstacle_circle.radius,
         );
 
         if (collision) {
@@ -243,7 +247,9 @@ pub const DinoGameState = struct {
             Obstacles.BigTree => {
                 self.obstacle_actor.BigTree.updateAnimation(self.ground.scroll_speed);
 
-                if (self.obstacle_actor.BigTree.pos.x <= -self.big_trees_asset.width) {
+                if (self.obstacle_actor.BigTree.pos.x <= -self.big_trees_asset.width(
+                    self.obstacle_actor.BigTree.state,
+                )) {
                     self.obstacle = obstacle.getRandomObstacle();
                     self.obstacle_actor = obstacle.getObstacleActor(
                         self.obstacle,
@@ -255,7 +261,7 @@ pub const DinoGameState = struct {
             Obstacles.SmallTree => {
                 self.obstacle_actor.SmallTree.updateAnimation(self.ground.scroll_speed);
 
-                if (self.obstacle_actor.SmallTree.pos.x <= -self.big_trees_asset.width) {
+                if (self.obstacle_actor.SmallTree.pos.x <= -self.small_trees_asset.width) {
                     self.obstacle = obstacle.getRandomObstacle();
                     self.obstacle_actor = obstacle.getObstacleActor(
                         self.obstacle,

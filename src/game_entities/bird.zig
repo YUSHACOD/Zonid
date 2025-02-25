@@ -4,6 +4,8 @@ const rl = @import("raylib");
 const Drawable = @import("../utils/drawable.zig").Drawable;
 const utils = @import("../utils/utils.zig");
 
+const Circle = @import("../game/obstacle.zig").Circle;
+
 const ResourcePaths = [_][*:0]const u8{
     "./resources/images/bird/b_wing_down.png",
     "./resources/images/bird/b_wing_up.png",
@@ -34,18 +36,27 @@ pub const Bird = struct {
         };
     }
 
-    pub fn getRec(self: Bird, bird_asset: *const BirdAsset) rl.Rectangle {
+    pub fn getCircle(self: Bird, bird_asset: *const BirdAsset) Circle {
         const adjusted_pos = utils.adjustPosHeight(
             self.pos,
             bird_asset.height,
         );
 
-        return rl.Rectangle.init(
-            adjusted_pos.x,
-            adjusted_pos.y,
+        const adjust_circle: rl.Vector2 = utils.adjustPosCircle(
+            adjusted_pos,
             bird_asset.width,
             bird_asset.height,
         );
+
+        const radius: f32 = if (bird_asset.width >= bird_asset.height)
+            bird_asset.height
+        else
+            bird_asset.width;
+
+        return Circle{
+            .center = adjust_circle,
+            .radius = @divFloor(radius, 2),
+        };
     }
 
     pub fn incrementState(self: *Bird) void {
@@ -68,6 +79,11 @@ pub const Bird = struct {
             self.pos,
             bird_asset.height,
         );
+
+        // const adjust_circle: rl.Vector2 = utils.adjustPosCircle(adjusted_pos, bird_asset.width, bird_asset.height);
+        //
+        // const radius: f32 = if (bird_asset.width >= bird_asset.height) bird_asset.height else bird_asset.width;
+        // rl.drawCircleV(adjust_circle, @divFloor(radius, 2), rl.Color.sky_blue);
 
         bird_asset.drawables[self.state].draw(adjusted_pos);
     }

@@ -15,15 +15,31 @@ pub fn vecToPos(vec: rl.Vector2) rl.Vector2 {
 }
 
 pub fn adjustPosMiddle(pos: rl.Vector2, width: f32, height: f32) rl.Vector2 {
-    return rl.Vector2{ .x = pos.x - @divFloor(width, 2), .y = pos.y - @divFloor(height, 2) };
+    return rl.Vector2{
+        .x = pos.x - @divFloor(width, 2),
+        .y = pos.y - @divFloor(height, 2),
+    };
 }
 
 pub fn adjustPosWidth(pos: rl.Vector2, width: f32, height: f32) rl.Vector2 {
-    return rl.Vector2{ .x = pos.x - @divFloor(width, 2), .y = pos.y - height };
+    return rl.Vector2{
+        .x = pos.x - @divFloor(width, 2),
+        .y = pos.y - height,
+    };
 }
 
 pub fn adjustPosHeight(pos: rl.Vector2, height: f32) rl.Vector2 {
-    return rl.Vector2{ .x = pos.x, .y = pos.y - @divFloor(height, 2) };
+    return rl.Vector2{
+        .x = pos.x,
+        .y = pos.y - @divFloor(height, 2),
+    };
+}
+
+pub fn adjustPosCircle(pos: rl.Vector2, width: f32, height: f32) rl.Vector2 {
+    return rl.Vector2{
+        .x = pos.x + @divFloor(width, 2),
+        .y = pos.y + @divFloor(height, 2),
+    };
 }
 
 pub fn updateWithMousePos(pos: *rl.Vector2) void {

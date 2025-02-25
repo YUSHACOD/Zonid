@@ -4,6 +4,8 @@ const rl = @import("raylib");
 const Drawable = @import("../utils/drawable.zig").Drawable;
 const utils = @import("../utils/utils.zig");
 
+const Circle = @import("../game/obstacle.zig").Circle;
+
 const ResourcePaths = [_][*:0]const u8{
     "./resources/images/dinos/dino_idle.png",
     "./resources/images/dinos/dino_run1.png",
@@ -94,19 +96,25 @@ pub const Dino = struct {
         }
     }
 
-    pub fn getRec(self: *Dino) rl.Rectangle {
+    pub fn getCircle(self: *Dino) Circle {
         const mid_adjustedPos: rl.Vector2 = utils.adjustPosWidth(
             self.pos,
             self.width,
             self.height,
         );
 
-        return rl.Rectangle.init(
-            mid_adjustedPos.x,
-            mid_adjustedPos.y,
+        const adjust_circle: rl.Vector2 = utils.adjustPosCircle(
+            mid_adjustedPos,
             self.width,
             self.height,
         );
+
+        const radius: f32 = if (self.width >= self.height) self.height else self.width;
+
+        return Circle{
+            .center = adjust_circle,
+            .radius = @divFloor(radius, 2),
+        };
     }
 
     pub fn updateAnimation(self: *Dino) void {
@@ -186,6 +194,10 @@ pub const Dino = struct {
         const current_state = self.state_idx;
         const mid_adjustedPos: rl.Vector2 = utils.adjustPosWidth(self.pos, self.width, self.height);
 
+        // const adjust_circle: rl.Vector2 = utils.adjustPosCircle(mid_adjustedPos, self.width, self.height);
+        //
+        // const radius: f32 = if (self.width >= self.height) self.height else self.width;
+        // rl.drawCircleV(adjust_circle, @divFloor(radius, 2), rl.Color.sky_blue);
         self.drawables[current_state].draw(mid_adjustedPos);
     }
 };

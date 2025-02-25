@@ -4,6 +4,8 @@ const rl = @import("raylib");
 const Drawable = @import("../utils/drawable.zig").Drawable;
 const utils = @import("../utils/utils.zig");
 
+const Circle = @import("../game/obstacle.zig").Circle;
+
 const ResourcePaths = [_][*:0]const u8{
     "./resources/images/big_tree/big_tree_1.png",
     "./resources/images/big_tree/big_tree_2.png",
@@ -34,19 +36,31 @@ pub const BigTree = struct {
         };
     }
 
-    pub fn getRec(self: BigTree, big_tree_asset: *BigTreesAsset) rl.Rectangle {
+    pub fn getCircle(self: BigTree, big_tree_asset: *BigTreesAsset) Circle {
+        const width = big_tree_asset.width(self.state);
+        const height = big_tree_asset.height(self.state);
+
         const adjusted_pos = utils.adjustPosWidth(
             self.pos,
-            big_tree_asset.width,
-            big_tree_asset.height,
+            width,
+            height,
         );
 
-        return rl.Rectangle.init(
-            adjusted_pos.x,
-            adjusted_pos.y,
-            big_tree_asset.width,
-            big_tree_asset.height,
+        const adjust_circle: rl.Vector2 = utils.adjustPosCircle(
+            adjusted_pos,
+            width,
+            height,
         );
+
+        const radius: f32 = if (width >= height)
+            height
+        else
+            width;
+
+        return Circle{
+            .center = adjust_circle,
+            .radius = @divFloor(radius, 2),
+        };
     }
 
     pub fn updateAnimation(self: *BigTree, scroll_speed: f32) void {
@@ -54,11 +68,27 @@ pub const BigTree = struct {
     }
 
     pub fn draw(self: *BigTree, big_tree_asset: *BigTreesAsset) void {
+        const width: f32 = big_tree_asset.width(self.state);
+        const height: f32 = big_tree_asset.height(self.state);
+
         const adjusted_pos = utils.adjustPosWidth(
             self.pos,
-            big_tree_asset.width,
-            big_tree_asset.height,
+            width,
+            height,
         );
+
+        // const adjust_circle: rl.Vector2 = utils.adjustPosCircle(
+        //     adjusted_pos,
+        //     width,
+        //     height,
+        // );
+        //
+        // const radius: f32 = if (width >= height)
+        //     height
+        // else
+        //     width;
+        //
+        // rl.drawCircleV(adjust_circle, @divFloor(radius, 2), rl.Color.sky_blue);
 
         big_tree_asset.drawables[self.state].draw(adjusted_pos);
     }
@@ -66,8 +96,6 @@ pub const BigTree = struct {
 
 pub const BigTreesAsset = struct {
     drawables: []Drawable,
-    width: f32,
-    height: f32,
 
     pub fn init(allocator: std.mem.Allocator) anyerror!BigTreesAsset {
         const drawables = try allocator.alloc(Drawable, ResourcePaths.len);
@@ -79,8 +107,6 @@ pub const BigTreesAsset = struct {
 
         return BigTreesAsset{
             .drawables = drawables,
-            .width = @floatFromInt(drawables[0].texture.width),
-            .height = @floatFromInt(drawables[0].texture.height),
         };
     }
 
@@ -89,6 +115,14 @@ pub const BigTreesAsset = struct {
             entity.deinit();
         }
         allocator.free(self.drawables);
+    }
+
+    pub fn width(self: *BigTreesAsset, state: usize) f32 {
+        return @floatFromInt(self.drawables[state].texture.width);
+    }
+
+    pub fn height(self: *BigTreesAsset, state: usize) f32 {
+        return @floatFromInt(self.drawables[state].texture.height);
     }
 
     pub fn draw(self: *BigTreesAsset, pos: rl.Vector2) void {

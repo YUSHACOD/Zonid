@@ -13,6 +13,11 @@ const BirdAsset = @import("../game_entities/bird.zig").BirdAsset;
 const BigTreesAsset = @import("../game_entities/big_trees.zig").BigTreesAsset;
 const SmallTreesAsset = @import("../game_entities/small_trees.zig").SmallTreesAsset;
 
+pub const Circle = struct {
+    center: rl.Vector2,
+    radius: f32,
+};
+
 pub const Obstacles = enum { Bird, BigTree, SmallTree };
 
 pub const Obstacle = union(Obstacles) {
@@ -53,16 +58,16 @@ pub const ObstacleActor = union(Obstacles) {
     SmallTree: SmallTree,
 };
 
-pub fn getRectangle(
+pub fn getCircle(
     actor: ObstacleActor,
     bird_asset: *const BirdAsset,
     big_tree_asset: *BigTreesAsset,
     small_tree_aseet: *SmallTreesAsset,
-) rl.Rectangle {
+) Circle {
     return switch (actor) {
-        Obstacles.Bird => actor.Bird.getRec(bird_asset),
-        Obstacles.BigTree => actor.BigTree.getRec(big_tree_asset),
-        Obstacles.SmallTree => actor.SmallTree.getRec(small_tree_aseet),
+        Obstacles.Bird => actor.Bird.getCircle(bird_asset),
+        Obstacles.BigTree => actor.BigTree.getCircle(big_tree_asset),
+        Obstacles.SmallTree => actor.SmallTree.getCircle(small_tree_aseet),
     };
 }
 
