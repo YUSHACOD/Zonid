@@ -11,8 +11,8 @@ pub const Drawable = struct {
     color: rl.Color,
 
     pub fn init(
-        texture_path: [*:0]const u8,
-        shader_path: ?[*:0]const u8,
+        texture_path: [:0]const u8,
+        shader_path: ?[:0]const u8,
     ) anyerror!Drawable {
         return Drawable{
             .texture = try rl.loadTexture(texture_path),

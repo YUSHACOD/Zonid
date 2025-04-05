@@ -6,7 +6,7 @@ const utils = @import("../utils/utils.zig");
 
 const Circle = @import("../game/obstacle.zig").Circle;
 
-const ResourcePaths = [_][*:0]const u8{
+const ResourcePaths = [_][:0]const u8{
     "./resources/images/small_tree/small_tree_1.png",
     "./resources/images/small_tree/small_tree_2.png",
     "./resources/images/small_tree/small_tree_3.png",

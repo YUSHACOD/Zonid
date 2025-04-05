@@ -4,7 +4,7 @@ const rl = @import("raylib");
 const Drawable = @import("../utils/drawable.zig").Drawable;
 const utils = @import("../utils/utils.zig");
 
-const ResourcePaths = [_][*:0]const u8{
+const ResourcePaths = [_][:0]const u8{
     "./resources/images/nums/0.png",
     "./resources/images/nums/1.png",
     "./resources/images/nums/2.png",

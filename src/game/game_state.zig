@@ -180,17 +180,6 @@ pub const DinoGameState = struct {
         }
 
         if (self.game_started and !self.game_ended) {
-            switch (rl.getKeyPressed()) {
-                rl.KeyboardKey.one => self.dino.changeState(DinoStates.Idle),
-                rl.KeyboardKey.two => self.dino.changeState(DinoStates.Running),
-                rl.KeyboardKey.three => self.dino.changeState(DinoStates.Crawling),
-                rl.KeyboardKey.four => self.dino.changeState(DinoStates.Shocked),
-                rl.KeyboardKey.five => self.dino.changeState(DinoStates.Blind),
-                rl.KeyboardKey.nine => self.dino_animation_speed += 0.1,
-                rl.KeyboardKey.zero => self.dino_animation_speed -= 0.1,
-                else => {},
-            }
-
             self.updateScoreAndSpeed();
 
             self.dino.updateAnimation();
